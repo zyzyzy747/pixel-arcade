@@ -30,7 +30,11 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          # 只发布站点真正需要的文件，避免本地临时文件/工具脚本被带上线
+          path: |
+            index.html
+            arcade
+            assets
 
       - name: Deploy to GitHub Pages
         id: deployment
