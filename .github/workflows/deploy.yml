@@ -27,14 +27,16 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp -r index.html arcade assets _site/
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # 只发布站点真正需要的文件，避免本地临时文件/工具脚本被带上线
-          path: |
-            index.html
-            arcade
-            assets
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
