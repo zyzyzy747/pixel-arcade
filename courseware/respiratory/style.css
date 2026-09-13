@@ -1,0 +1,433 @@
+/* ============================================================
+   呼吸系统与肺泡气体交换 · 3D 互动课件   样式表
+   配色：深色科技底 #0a1628 / 主色青蓝 #4fd1c5 / 高亮橙 #ff9f43
+   ============================================================ */
+
+:root {
+  --bg-0: #071120;
+  --bg-1: #0a1628;
+  --bg-2: #0f2039;
+  --line: rgba(79, 209, 197, 0.18);
+  --line-strong: rgba(79, 209, 197, 0.45);
+  --primary: #4fd1c5;
+  --highlight: #ff9f43;
+  --text: #e8f1fa;
+  --text-dim: #9fb4cc;
+  --o2: #4da3ff;
+  --co2: #ff4d4d;
+  --ok: #35d07f;
+  --radius: 12px;
+  --font: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Source Han Sans SC",
+          "Noto Sans CJK SC", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-0);
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ================= 顶部栏 ================= */
+#topbar {
+  flex: 0 0 74px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 22px;
+  background: linear-gradient(180deg, #10203a 0%, #0a1628 100%);
+  border-bottom: 1px solid var(--line);
+  z-index: 20;
+}
+
+.brand { display: flex; align-items: center; gap: 12px; min-width: 300px; }
+
+.brand-mark {
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border-radius: 11px;
+  font-size: 20px; font-weight: 700;
+  color: #062028;
+  background: linear-gradient(135deg, var(--primary), #2fa9a0);
+  box-shadow: 0 0 18px rgba(79, 209, 197, 0.4);
+}
+
+.brand-text h1 { margin: 0; font-size: 18px; letter-spacing: 0.6px; font-weight: 700; }
+.brand-text p { margin: 2px 0 0; font-size: 12px; color: var(--text-dim); }
+
+.tabs { display: flex; gap: 8px; flex: 1; justify-content: center; }
+
+.tab {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 20px;
+  font-size: 15px; font-family: inherit;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all .22s ease;
+}
+.tab i { font-style: normal; color: var(--primary); opacity: .8; }
+.tab:hover { color: var(--text); background: rgba(79, 209, 197, 0.1); }
+.tab.is-active {
+  color: #062028;
+  background: linear-gradient(135deg, var(--primary), #38bdb1);
+  border-color: transparent;
+  font-weight: 700;
+  box-shadow: 0 0 16px rgba(79, 209, 197, .35);
+}
+.tab.is-active i { color: #062028; }
+
+.top-actions { min-width: 130px; text-align: right; }
+
+/* ================= 通用按钮 ================= */
+.btn {
+  padding: 9px 18px;
+  font-size: 14px; font-family: inherit;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all .2s ease;
+  white-space: nowrap;
+}
+.btn:hover { background: rgba(79, 209, 197, 0.16); border-color: var(--line-strong); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn.primary {
+  color: #062028; font-weight: 700;
+  background: linear-gradient(135deg, var(--primary), #35bdb1);
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(79, 209, 197, .28);
+}
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.primary.is-on {
+  background: linear-gradient(135deg, var(--highlight), #ff7d1a);
+  box-shadow: 0 4px 16px rgba(255, 159, 67, .4);
+}
+.btn.ghost { background: transparent; color: var(--text-dim); }
+.btn.ghost:hover { color: var(--text); }
+.btn-demo { font-weight: 700; color: var(--highlight); border-color: rgba(255, 159, 67, .45); }
+.btn-demo:hover { background: rgba(255, 159, 67, .14); border-color: var(--highlight); }
+
+/* ================= 中部 ================= */
+#stage { flex: 1; display: flex; min-height: 0; position: relative; }
+
+#canvasWrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 42%, #16304f 0%, #0c1b2f 45%, #071120 100%);
+}
+#canvasWrap canvas { display: block; position: absolute; inset: 0; }
+
+/* CSS2D 标签层 */
+.label-layer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+
+.scene-tag {
+  position: absolute; left: 18px; top: 14px;
+  padding: 6px 14px;
+  font-size: 13px; letter-spacing: 1px;
+  color: var(--primary);
+  background: rgba(10, 22, 40, .72);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  pointer-events: none;
+  backdrop-filter: blur(6px);
+}
+
+.hint-bar {
+  position: absolute; left: 18px; bottom: 14px;
+  font-size: 12px; color: rgba(159, 180, 204, .65);
+  pointer-events: none;
+}
+
+/* 场景B 大字状态 */
+.status-big {
+  position: absolute; left: 50%; top: 26px;
+  transform: translateX(-50%);
+  font-size: 40px; font-weight: 800; letter-spacing: 4px;
+  color: var(--highlight);
+  text-shadow: 0 0 26px rgba(255, 159, 67, .55);
+  opacity: 0;
+  transition: opacity .25s ease;
+  pointer-events: none;
+}
+.status-big.show { opacity: 1; }
+.status-big.inhale { color: var(--primary); text-shadow: 0 0 26px rgba(79, 209, 197, .55); }
+
+/* 场景C 气体图例 */
+.legend-gas {
+  position: absolute; left: 18px; bottom: 44px;
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 12px 16px;
+  background: rgba(10, 22, 40, .78);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-size: 14px;
+  pointer-events: none;
+  backdrop-filter: blur(6px);
+}
+.legend-gas[hidden] { display: none; }
+.lg-item { display: flex; align-items: center; gap: 8px; }
+.lg-item b { letter-spacing: 1px; }
+.dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.dot-o2 { background: var(--o2); box-shadow: 0 0 10px var(--o2); }
+.dot-co2 { background: var(--co2); box-shadow: 0 0 10px var(--co2); }
+
+/* ================= 3D 标签（CSS2DRenderer） ================= */
+.label3d {
+  position: relative;
+  pointer-events: auto;
+  cursor: pointer;
+  user-select: none;
+  transform: translate(-50%, -50%);
+}
+.label3d .pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 12px;
+  font-size: 14px; white-space: nowrap;
+  color: #dff6f3;
+  background: rgba(9, 26, 44, .82);
+  border: 1px solid rgba(79, 209, 197, .45);
+  border-radius: 999px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .45);
+  transition: all .2s ease;
+}
+.label3d .pill .p-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 8px var(--primary);
+}
+.label3d:hover .pill { transform: scale(1.06); border-color: var(--primary); }
+.label3d.is-on .pill {
+  color: #062028; font-weight: 700;
+  background: linear-gradient(135deg, var(--highlight), #ff7d1a);
+  border-color: transparent;
+  box-shadow: 0 0 18px rgba(255, 159, 67, .5);
+}
+.label3d.is-on .pill .p-dot { background: #062028; box-shadow: none; }
+
+/* 知识卡（点标签弹出） */
+.kb-card {
+  position: absolute; left: 50%; top: calc(100% + 10px);
+  transform: translateX(-50%) translateY(-6px);
+  width: 244px;
+  padding: 12px 14px;
+  font-size: 13px; line-height: 1.7;
+  color: var(--text);
+  background: rgba(11, 27, 47, .96);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+  opacity: 0; visibility: hidden;
+  transition: opacity .2s ease, transform .2s ease;
+  pointer-events: none;
+  z-index: 5;
+}
+.kb-card.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+.kb-card h4 { margin: 0 0 6px; font-size: 14px; color: var(--highlight); }
+.kb-card p { margin: 0; color: #cfe0ef; }
+
+/* 场景C 的 O₂ / CO₂ 气体标签（常显，颜色区分） */
+.label3d.gas .pill.o2 { border-color: rgba(77, 163, 255, .75); color: #d6e9ff; }
+.label3d.gas .pill.o2 .p-dot { background: var(--o2); box-shadow: 0 0 8px var(--o2); }
+.label3d.gas .pill.co2 { border-color: rgba(255, 77, 77, .75); color: #ffdada; }
+.label3d.gas .pill.co2 .p-dot { background: var(--co2); box-shadow: 0 0 8px var(--co2); }
+
+/* ================= 右侧知识面板 ================= */
+.panel {
+  flex: 0 0 330px;
+  padding: 20px 20px 16px;
+  background: linear-gradient(180deg, #0d1c31 0%, #0a1628 100%);
+  border-left: 1px solid var(--line);
+  overflow-y: auto;
+}
+.panel h2 {
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  font-size: 17px;
+  border-bottom: 1px solid var(--line);
+  color: var(--primary);
+}
+.panel-body { font-size: 14px; line-height: 1.85; color: #cfe0ef; }
+.panel-body .sec { margin-bottom: 16px; }
+.panel-body .sec-t {
+  display: inline-block;
+  margin-bottom: 4px;
+  padding: 2px 10px;
+  font-size: 13px; font-weight: 700;
+  border-radius: 6px;
+  background: rgba(79, 209, 197, .14);
+  color: var(--primary);
+}
+.panel-body .sec-t.orange { background: rgba(255, 159, 67, .14); color: var(--highlight); }
+.panel-body ul { margin: 6px 0 0; padding-left: 18px; }
+.panel-body li { margin-bottom: 3px; }
+.panel-body .kv { color: var(--text-dim); }
+.panel-body .flow { color: var(--highlight); font-weight: 700; }
+.panel-tip {
+  margin-top: 12px; padding: 10px 12px;
+  font-size: 12.5px; line-height: 1.7;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, .03);
+  border-left: 3px solid var(--line-strong);
+  border-radius: 6px;
+}
+
+/* ================= 底部按钮条 ================= */
+#bottombar {
+  flex: 0 0 66px;
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 22px;
+  background: linear-gradient(0deg, #10203a 0%, #0a1628 100%);
+  border-top: 1px solid var(--line);
+}
+.tools { display: flex; gap: 10px; }
+.tools[hidden] { display: none; }
+.quiz-progress { margin-left: auto; font-size: 13px; color: var(--text-dim); letter-spacing: .5px; }
+
+/* ================= 演示模式 ================= */
+.demo-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  display: grid; place-items: end end;
+  padding: 24px 28px;
+  background: transparent;
+  cursor: pointer;
+}
+.demo-overlay[hidden] { display: none; }
+.demo-hint {
+  padding: 8px 16px;
+  font-size: 14px;
+  color: var(--text-dim);
+  background: rgba(7, 17, 32, .6);
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+}
+body.demo-mode #topbar .tabs,
+body.demo-mode #topbar .top-actions,
+body.demo-mode #bottombar,
+body.demo-mode .hint-bar { opacity: 0; pointer-events: none; transition: opacity .35s ease; }
+
+.demo-end {
+  position: fixed; inset: 0; z-index: 80;
+  display: grid; place-items: center;
+  background: #04080f;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+.demo-end[hidden] { display: none; }
+.demo-end.show { opacity: 1; }
+.demo-end p {
+  margin: 0; padding: 0 60px;
+  font-size: 34px; font-weight: 700; letter-spacing: 3px;
+  text-align: center; line-height: 1.6;
+  color: var(--primary);
+  text-shadow: 0 0 30px rgba(79, 209, 197, .45);
+}
+
+/* ================= 弹窗（选择题 / 完成） ================= */
+.modal {
+  position: fixed; inset: 0; z-index: 70;
+  display: grid; place-items: center;
+  background: rgba(4, 10, 20, .62);
+  backdrop-filter: blur(3px);
+  animation: fadeIn .22s ease;
+}
+.modal[hidden] { display: none; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal-card {
+  width: 520px; max-width: calc(100vw - 40px);
+  padding: 22px 24px;
+  background: linear-gradient(180deg, #102238 0%, #0b1a2e 100%);
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .55);
+}
+.modal-card h3 { margin: 12px 0 16px; font-size: 17px; line-height: 1.6; }
+
+.quiz-head { display: flex; align-items: center; justify-content: space-between; }
+.quiz-tag {
+  padding: 3px 12px; font-size: 12px;
+  color: var(--primary);
+  background: rgba(79, 209, 197, .14);
+  border-radius: 999px;
+}
+.quiz-count { font-size: 13px; color: var(--text-dim); }
+
+.quiz-options { display: flex; flex-direction: column; gap: 9px; }
+.q-opt {
+  padding: 11px 14px;
+  font-size: 14.5px; font-family: inherit; text-align: left;
+  color: var(--text);
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .09);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all .18s ease;
+}
+.q-opt:hover:not(:disabled) { background: rgba(79, 209, 197, .14); border-color: var(--line-strong); }
+.q-opt .q-key { display: inline-block; width: 22px; font-weight: 700; color: var(--primary); }
+.q-opt.right { background: rgba(53, 208, 127, .18); border-color: var(--ok); }
+.q-opt.right .q-key { color: var(--ok); }
+.q-opt.wrong { background: rgba(255, 77, 77, .16); border-color: var(--co2); }
+.q-opt.wrong .q-key { color: var(--co2); }
+.q-opt:disabled { cursor: default; }
+
+.quiz-feedback {
+  margin-top: 14px; padding: 0;
+  font-size: 13.5px; line-height: 1.75;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.quiz-feedback:not(:empty) { padding: 11px 14px; }
+.quiz-feedback.ok { color: #b6f5d4; background: rgba(53, 208, 127, .12); border: 1px solid rgba(53, 208, 127, .35); }
+.quiz-feedback.no { color: #ffc9c9; background: rgba(255, 77, 77, .12); border: 1px solid rgba(255, 77, 77, .35); }
+.quiz-foot { margin-top: 16px; display: flex; justify-content: flex-end; gap: 10px; }
+
+.finish-card { text-align: center; }
+.finish-mark {
+  width: 78px; height: 78px; margin: 4px auto 12px;
+  display: grid; place-items: center;
+  font-size: 22px; font-weight: 800; color: #062028;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), #2fa9a0);
+  box-shadow: 0 0 28px rgba(79, 209, 197, .45);
+}
+.finish-card h3 { margin: 0 0 8px; font-size: 20px; color: var(--primary); }
+.finish-card p { margin: 0; font-size: 14px; line-height: 1.8; color: #cfe0ef; }
+.finish-card .quiz-foot { justify-content: center; }
+
+/* ================= 启动失败 ================= */
+.boot-error {
+  position: fixed; inset: 0; z-index: 99;
+  display: grid; place-content: center; justify-items: center;
+  gap: 8px; padding: 40px;
+  text-align: center;
+  background: #071120;
+}
+.boot-error[hidden] { display: none; }
+.boot-error h2 { margin: 0; color: var(--co2); }
+.boot-error p { margin: 0; font-size: 14px; color: #cfe0ef; }
+.boot-error .muted { color: var(--text-dim); font-size: 13px; }
+
+/* ================= 窄屏兜底 ================= */
+@media (max-width: 1180px) {
+  .panel { flex-basis: 280px; }
+  .brand-text p { display: none; }
+}
