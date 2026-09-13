@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="KEPpWuJBBqZfpIK7isTpie">
+<head data-page-node-id="ghrKvbDLm5zx2lnw8GGcWH">
+<meta charset="UTF-8" data-page-node-id="DCdJE375xatlbMOo3RSWgN" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="KUbHAF0w8x7PGIoZF7X4S0" />
+<title>氧气·氢气·碳酸钙与盐酸 —— 常见化学反应 3D 互动课件</title>
+
+<!-- =====================================================================
+     importmap：ES Module 方式引入 three.js r160.1（unpkg CDN）
+     说明：本文件内联的引导脚本会优先使用同目录 libs/three.bundle.js（离线包），
+           只有在离线包缺失时才走下面的 CDN 路径，实现"双击即可运行"双保险。
+     ===================================================================== -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.1/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.1/examples/jsm/"
+  }
+}
+</script>
+
+<style>
+/* =====================================================================
+   ===== 全局样式：深色科技风 =====
+   ===================================================================== */
+:root{
+  --bg:#0a1628;          /* 深色科技风底 */
+  --bg2:#0d1c33;
+  --panel:rgba(13,28,51,.82);
+  --line:rgba(79,209,197,.22);
+  --cyan:#4fd1c5;        /* 主色 青蓝 */
+  --orange:#ff9f43;      /* 高亮 橙 */
+  --txt:#e6f1ff;
+  --dim:#8fa6c4;
+  --ok:#3ddc84;
+  --err:#ff5d6c;
+  /* 元素配色（与 3D 场景保持一致） */
+  --el-O:#ff4d4d; --el-H:#f2f6ff; --el-C:#8a93a6; --el-Cl:#3ddc84; --el-Ca:#a96bff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:radial-gradient(1200px 700px at 50% -10%, #123154 0%, var(--bg) 55%, #060e1c 100%);
+  color:var(--txt);
+  font-family:"Microsoft YaHei UI","Microsoft YaHei","PingFang SC","Hiragino Sans GB","Source Han Sans SC","Noto Sans CJK SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  overflow:hidden;
+  user-select:none;
+  -webkit-font-smoothing:antialiased;
+}
+#app{display:flex;flex-direction:column;height:100vh;width:100vw}
+
+/* ===================== 顶部栏 ===================== */
+#topbar{
+  height:60px;flex:0 0 60px;display:flex;align-items:center;gap:16px;
+  padding:0 18px;background:linear-gradient(180deg,rgba(13,28,51,.95),rgba(10,22,40,.75));
+  border-bottom:1px solid var(--line);z-index:20;
+}
+.brand{display:flex;align-items:baseline;gap:10px;white-space:nowrap}
+.brand .t1{font-size:17px;font-weight:700;letter-spacing:.5px}
+.brand .t1 em{font-style:normal;color:var(--cyan)}
+.brand .t2{font-size:12px;color:var(--dim)}
+.tabs{display:flex;gap:8px;margin-left:12px}
+.tab{
+  padding:8px 16px;border-radius:10px;font-size:14px;cursor:pointer;
+  background:rgba(79,209,197,.07);border:1px solid var(--line);color:var(--dim);
+  transition:all .22s ease;white-space:nowrap;
+}
+.tab:hover{color:var(--txt);border-color:rgba(79,209,197,.5)}
+.tab.active{background:linear-gradient(135deg,rgba(79,209,197,.28),rgba(79,209,197,.10));color:#fff;border-color:var(--cyan);box-shadow:0 0 14px rgba(79,209,197,.25)}
+.tab.locked{opacity:.45;cursor:not-allowed;filter:grayscale(.6)}
+.top-actions{margin-left:auto;display:flex;gap:10px;align-items:center}
+
+/* ===================== 通用按钮 ===================== */
+.btn{
+  padding:9px 16px;border-radius:10px;font-size:14px;cursor:pointer;
+  background:rgba(79,209,197,.08);border:1px solid var(--line);color:var(--txt);
+  transition:all .2s ease;white-space:nowrap;font-family:inherit;
+}
+.btn:hover{background:rgba(79,209,197,.18);border-color:var(--cyan);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn.primary{background:linear-gradient(135deg,var(--cyan),#2bb3a8);color:#062028;border-color:transparent;font-weight:700}
+.btn.primary:hover{box-shadow:0 6px 18px rgba(79,209,197,.35)}
+.btn.warn{background:linear-gradient(135deg,var(--orange),#f07f18);color:#2a1400;border-color:transparent;font-weight:700}
+.btn.warn:hover{box-shadow:0 6px 18px rgba(255,159,67,.35)}
+.btn.on{background:rgba(255,159,67,.22);border-color:var(--orange);color:#ffd7a8}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* ===================== 主体 ===================== */
+#main{flex:1;display:flex;min-height:0;position:relative}
+#viewport{flex:1;position:relative;overflow:hidden}
+#viewport canvas{display:block;width:100%;height:100%}
+
+/* 3D 标签层：屏幕投影 HTML */
+#labelLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:5}
+.tag3d{
+  position:absolute;transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer;
+  padding:5px 11px;border-radius:20px;font-size:13px;white-space:nowrap;
+  background:rgba(10,22,40,.78);border:1px solid rgba(79,209,197,.45);color:var(--txt);
+  backdrop-filter:blur(6px);transition:all .2s ease;box-shadow:0 3px 12px rgba(0,0,0,.35);
+}
+.tag3d:hover{background:rgba(79,209,197,.25);transform:translate(-50%,-50%) scale(1.08)}
+.tag3d.hl{
+  background:linear-gradient(135deg,var(--orange),#f07f18);color:#2a1400;
+  border-color:#ffd7a8;font-weight:700;box-shadow:0 0 20px rgba(255,159,67,.6);
+}
+.tag3d.product{
+  background:linear-gradient(135deg,rgba(61,220,132,.9),rgba(79,209,197,.85));
+  color:#05231a;border-color:#bff5d8;font-weight:700;box-shadow:0 0 18px rgba(61,220,132,.45);
+}
+.tag3d .sub{font-size:11px;opacity:.8;margin-left:5px}
+.tag3d.hidden{opacity:0;pointer-events:none}
+
+/* 状态胶囊（录屏一眼看懂） */
+#capsule{
+  position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:8;
+  padding:10px 26px;border-radius:26px;font-size:19px;font-weight:700;letter-spacing:1px;
+  background:rgba(10,22,40,.88);border:1px solid var(--cyan);color:var(--cyan);
+  box-shadow:0 6px 26px rgba(0,0,0,.45);opacity:0;transition:opacity .35s ease;white-space:nowrap;
+  max-width:80%;text-align:center;
+}
+#capsule.show{opacity:1}
+#capsule.hot{border-color:var(--orange);color:var(--orange)}
+
+/* 左下元素图例 */
+#legend{
+  position:absolute;left:16px;bottom:16px;z-index:7;padding:11px 14px;border-radius:12px;
+  background:rgba(10,22,40,.78);border:1px solid var(--line);backdrop-filter:blur(8px);
+  font-size:12px;color:var(--dim);max-width:230px;
+}
+#legend h4{font-size:12px;color:var(--cyan);margin-bottom:7px;font-weight:700;letter-spacing:1px}
+#legend .row{display:flex;align-items:center;gap:6px;margin:4px 0}
+#legend .dot{width:13px;height:13px;border-radius:50%;border:1px solid rgba(255,255,255,.35);flex:0 0 auto}
+#legend .div{height:1px;background:var(--line);margin:8px 0}
+
+/* 右下操作提示 */
+#hint{
+  position:absolute;right:16px;bottom:16px;z-index:7;font-size:12px;color:var(--dim);
+  background:rgba(10,22,40,.6);padding:7px 12px;border-radius:9px;border:1px solid var(--line);
+}
+#hint b{color:var(--cyan);font-weight:600}
+
+/* ===================== 右侧知识面板 ===================== */
+#panel{
+  width:330px;flex:0 0 330px;background:var(--panel);border-left:1px solid var(--line);
+  display:flex;flex-direction:column;backdrop-filter:blur(10px);z-index:10;
+}
+.panel-head{padding:15px 18px 12px;border-bottom:1px solid var(--line)}
+.panel-head h2{font-size:16px;color:var(--cyan);font-weight:700}
+.panel-head p{font-size:12px;color:var(--dim);margin-top:5px;line-height:1.6}
+.panel-body{flex:1;overflow-y:auto;padding:14px 18px 22px}
+.panel-body::-webkit-scrollbar{width:7px}
+.panel-body::-webkit-scrollbar-thumb{background:rgba(79,209,197,.3);border-radius:4px}
+.sec{margin-bottom:15px}
+.sec h3{
+  font-size:13px;color:var(--orange);margin-bottom:7px;font-weight:700;
+  display:flex;align-items:center;gap:6px;
+}
+.sec h3::before{content:'';width:3px;height:13px;background:var(--orange);border-radius:2px}
+.sec p{font-size:13px;line-height:1.85;color:#c5d6ea}
+.sec .kv{font-size:12.5px;line-height:1.9;color:#b6c9e0}
+.sec .kv b{color:var(--cyan);font-weight:600}
+/* 分子知识卡 */
+.molcard{border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:rgba(79,209,197,.05)}
+.molcard .f{
+  font-size:31px;font-weight:800;color:var(--cyan);letter-spacing:2px;margin-bottom:3px;
+  text-shadow:0 0 18px rgba(79,209,197,.35);
+}
+.molcard .n{font-size:13px;color:var(--txt);margin-bottom:8px}
+.molcard .d{font-size:12.5px;line-height:1.8;color:#c5d6ea}
+/* 方程式 */
+.eq{
+  border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:9px;
+  background:rgba(255,159,67,.06);font-size:14px;line-height:1.7;
+}
+.eq .main{color:var(--txt);font-weight:600;letter-spacing:.5px}
+.eq .note{font-size:12px;color:var(--orange);margin-top:4px}
+.eq .tip{font-size:12px;color:var(--dim);margin-top:3px}
+/* 反应类型卡 */
+.rtype{border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:8px;background:rgba(79,209,197,.05)}
+.rtype .h{font-size:13.5px;color:var(--cyan);font-weight:700;margin-bottom:3px}
+.rtype .b{font-size:12px;color:#b6c9e0;line-height:1.7}
+
+/* ===================== 底部按钮条 ===================== */
+#bottombar{
+  flex:0 0 74px;height:74px;display:flex;align-items:center;gap:10px;padding:0 18px;
+  background:linear-gradient(0deg,rgba(13,28,51,.95),rgba(10,22,40,.7));
+  border-top:1px solid var(--line);z-index:20;overflow-x:auto;
+}
+#bottombar::-webkit-scrollbar{height:0}
+.toolgroup{display:none;align-items:center;gap:10px}
+.toolgroup.active{display:flex}
+.toolgroup .glabel{font-size:12px;color:var(--dim);margin-right:2px;white-space:nowrap}
+.spacer{flex:1;min-width:6px}
+#progressWrap{display:flex;align-items:center;gap:9px;white-space:nowrap;font-size:12.5px;color:var(--dim)}
+#progressWrap .bar{width:112px;height:7px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden}
+#progressWrap .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--orange));transition:width .35s ease}
+#progressWrap b{color:var(--cyan)}
+
+/* ===================== 选择题弹窗 ===================== */
+#quizMask{
+  position:fixed;inset:0;background:rgba(4,10,20,.72);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;z-index:60;
+}
+#quizMask.show{display:flex}
+#quizBox{
+  width:560px;max-width:92vw;background:linear-gradient(160deg,#12263f,#0c1a2e);
+  border:1px solid var(--cyan);border-radius:16px;padding:22px 24px;
+  box-shadow:0 24px 70px rgba(0,0,0,.6);animation:pop .28s ease;
+}
+@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+#quizBox .qhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+#quizBox .qno{font-size:12.5px;color:var(--cyan);letter-spacing:1px}
+#quizBox .qclose{font-size:12px;color:var(--dim);cursor:pointer;padding:3px 9px;border:1px solid var(--line);border-radius:7px}
+#quizBox .qclose:hover{color:var(--txt);border-color:var(--cyan)}
+#quizBox .qtitle{font-size:17px;line-height:1.6;margin-bottom:15px;font-weight:600}
+#quizBox .opts{display:flex;flex-direction:column;gap:9px}
+.opt{
+  padding:12px 15px;border-radius:11px;border:1px solid var(--line);
+  background:rgba(79,209,197,.05);cursor:pointer;font-size:14.5px;transition:all .18s ease;
+  display:flex;align-items:center;gap:10px;
+}
+.opt:hover:not(.done){background:rgba(79,209,197,.16);border-color:var(--cyan);transform:translateX(4px)}
+.opt .k{
+  width:24px;height:24px;flex:0 0 24px;border-radius:50%;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:12.5px;color:var(--dim);
+}
+.opt.right{background:rgba(61,220,132,.18);border-color:var(--ok)}
+.opt.right .k{background:var(--ok);color:#04220f;border-color:var(--ok)}
+.opt.wrong{background:rgba(255,93,108,.16);border-color:var(--err)}
+.opt.wrong .k{background:var(--err);color:#330009;border-color:var(--err)}
+.opt.done{cursor:default}
+#quizBox .feedback{margin-top:14px;padding:12px 14px;border-radius:11px;font-size:13.5px;line-height:1.75;display:none}
+#quizBox .feedback.ok{display:block;background:rgba(61,220,132,.13);border:1px solid rgba(61,220,132,.5);color:#a9f5c9}
+#quizBox .feedback.no{display:block;background:rgba(255,93,108,.12);border:1px solid rgba(255,93,108,.5);color:#ffc0c6}
+#quizBox .feedback .lab{font-weight:700;margin-bottom:4px;display:block}
+#quizBox .qfoot{margin-top:15px;display:flex;justify-content:flex-end;gap:9px}
+
+/* 通关面板 */
+#finishMask{
+  position:fixed;inset:0;background:rgba(4,10,20,.74);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;z-index:66;
+}
+#finishMask.show{display:flex}
+#finishBox{
+  width:520px;max-width:92vw;text-align:center;padding:28px 26px;border-radius:16px;
+  background:linear-gradient(160deg,#12263f,#0c1a2e);border:1px solid var(--orange);
+  box-shadow:0 24px 70px rgba(0,0,0,.6);animation:pop .3s ease;
+}
+#finishBox .big{font-size:22px;color:var(--cyan);font-weight:800;margin:10px 0 10px}
+#finishBox .sub{font-size:13.5px;color:#c5d6ea;line-height:2}
+
+/* ===================== 演示模式 ===================== */
+body.demo-mode #topbar,
+body.demo-mode #panel,
+body.demo-mode #bottombar,
+body.demo-mode #legend,
+body.demo-mode #hint{opacity:0;pointer-events:none;transition:opacity .4s ease}
+#demoTip{
+  position:fixed;right:22px;bottom:20px;z-index:70;font-size:13px;color:var(--dim);
+  background:rgba(10,22,40,.7);padding:8px 14px;border-radius:20px;border:1px solid var(--line);
+  display:none;
+}
+body.demo-mode #demoTip{display:block}
+#summary{
+  position:fixed;inset:0;background:#04080f;z-index:65;display:none;
+  align-items:center;justify-content:center;flex-direction:column;
+  opacity:0;transition:opacity 1.1s ease;
+}
+#summary.show{display:flex;opacity:1}
+#summary .line1{font-size:30px;font-weight:700;letter-spacing:3px;color:var(--cyan);margin-bottom:14px}
+#summary .line2{font-size:20px;color:var(--txt);letter-spacing:2px;opacity:.9}
+
+/* ===================== 加载 / 离线提示 ===================== */
+#boot{
+  position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;
+  align-items:center;justify-content:center;flex-direction:column;gap:16px;
+}
+#boot.hide{display:none}
+#boot .sp{
+  width:46px;height:46px;border-radius:50%;border:3px solid rgba(79,209,197,.18);
+  border-top-color:var(--cyan);animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+#boot .msg{font-size:14px;color:var(--dim);text-align:center;line-height:1.9;max-width:520px}
+#boot .msg b{color:var(--orange)}
+#boot .err{color:var(--err);font-size:13.5px;line-height:1.9;text-align:center;max-width:560px;display:none}
+#boot.failed .sp{display:none}
+#boot.failed .err{display:block}
+#boot.failed .msg{display:none}
+
+@media (max-width:1280px){
+  #panel{width:290px;flex-basis:290px}
+  .brand .t2{display:none}
+}
+</style>
+</head>
+
+<body data-page-node-id="lgUtOqOhWrTYw9qCMVDGdn">
+<div id="app" data-page-node-id="WVmC1sqjycPcuG9C11hZoI">
+
+  <!-- ================= 顶部栏 ================= -->
+  <div id="topbar" data-page-node-id="kGROIABG41wCLdEU3CLFnq">
+    <div class="brand" data-page-node-id="e8RHg6lN5Bx210M0MrQa6r">
+      <div class="t1" data-page-node-id="tqZMwEEzbaLv7fNINz3wQG">常见化学反应 <em data-page-node-id="SbbEmlF6AjNvClGWau3YSx">3D 互动课件</em></div>
+      <div class="t2" data-page-node-id="YZVQnXcZPJRU0sPwa4fVDM">氧气 · 氢气 · 碳酸钙与盐酸</div>
+    </div>
+    <div class="tabs" id="tabs" data-page-node-id="pPpXYC7Kc9jGYWth4t0e1w">
+      <div class="tab" data-scene="A" data-page-node-id="OepdfWKmL41rPvtg3eJCmN">A 分子结构</div>
+      <div class="tab locked" data-scene="B" data-page-node-id="hd1EbDRk6afMcDZJAoiwgv">🔒 B 反应实验</div>
+      <div class="tab locked" data-scene="C" data-page-node-id="G6fdoHngBYfjByyckrdH8r">🔒 C 微观世界</div>
+    </div>
+    <div class="top-actions" data-page-node-id="og2USkw1wVylR34UG1C3Pg">
+      <button class="btn warn" id="btnDemo" data-page-node-id="z8p05MbNo6PNOMbSGhZrNu">▶ 演示模式</button>
+    </div>
+  </div>
+
+  <!-- ================= 主体 ================= -->
+  <div id="main" data-page-node-id="qCTr7Ze0XmxIi0fRx9FqWf">
+    <div id="viewport" data-page-node-id="FamO0jn0WXrjJd1ism5D1F">
+      <div id="labelLayer" data-page-node-id="Hk3HAmGyQiyMvtUoJvHOSG"></div>
+      <div id="capsule" data-page-node-id="Kcg0MFvlH25gBU9KtGis3K"></div>
+      <div id="legend" data-page-node-id="AtcwRG70ctBUaUX1C6guad">
+        <h4 data-page-node-id="cLh0XJItK7EGrLpr0y7rhf">元素配色图例</h4>
+        <div class="row" data-page-node-id="x8HCJxi3ve6j6JGKIGAjlt"><span class="dot" style="background:#ff4d4d" data-page-node-id="Th2TCC3j5MZrQm2NN1dXlf"></span> O 氧（红色）</div>
+        <div class="row" data-page-node-id="GrNfDc8RXQ2qJ6xVUv4XAJ"><span class="dot" style="background:#f2f6ff" data-page-node-id="Q27SSdCIpmeaBOa4rumHHq"></span> H 氢（白色）</div>
+        <div class="row" data-page-node-id="MsonroYei9qKhViGyymzZM"><span class="dot" style="background:#8a93a6" data-page-node-id="Dy4omtWaKWR1ZjysZG1E6J"></span> C 碳（灰色）</div>
+        <div class="row" data-page-node-id="J9oZ45zgWAn3uoycNYMr3L"><span class="dot" style="background:#3ddc84" data-page-node-id="Tz4EIM0PpoZzOwqP48Muu6"></span> Cl 氯（绿色）</div>
+        <div class="row" data-page-node-id="0TWdzjIBBOkBYCtaNJEDIH"><span class="dot" style="background:#a96bff" data-page-node-id="yOEeYE1imgNQomVhIez1YI"></span> Ca 钙（紫色）</div>
+        <div class="div" data-page-node-id="bADg4oHlDNSeFYBZ242fYj"></div>
+        <div class="row" data-page-node-id="zOdrbgKZZoLSrFh12HDDiV"><span class="dot" style="background:#f2f6ff" data-page-node-id="xgpaUSBJ9nwdjoYNFkHZoJ"></span> H₂ 气泡（负极 · 快）</div>
+        <div class="row" data-page-node-id="Pnw0j6JGVg4olYwow4X9SK"><span class="dot" style="background:#ff4d4d" data-page-node-id="oDrHj6bZeGgBTupGMMdwEe"></span> O₂ 气泡（正极 · 慢）</div>
+        <div class="row" data-page-node-id="84FhBcTYDqmOSE2HLtR2IH"><span class="dot" style="background:#ff9f43" data-page-node-id="mIqZGwCNmOhGfkLyegbtnA"></span> CO₂ 气泡（大理石+盐酸）</div>
+      </div>
+      <div id="hint" data-page-node-id="yNwEwCqs8uhyUr34rWjIIu"><b data-page-node-id="7MM4DCnmFTlQhhyosZMfhQ">拖拽</b>旋转 · <b data-page-node-id="oiABWlfKueDNSHenCM2ojG">滚轮</b>缩放 · <b data-page-node-id="xboQogAkFDhbxGO9QXMR97">双击</b>复位 · <b data-page-node-id="tTmun8JLAE0FByTlsMjp6B">点击标签</b>看知识</div>
+    </div>
+
+    <!-- ================= 右侧知识面板 ================= -->
+    <div id="panel" data-page-node-id="UZ62qx51GHlVEzD2wKdvEl">
+      <div class="panel-head" data-page-node-id="3MCJ2S4upHdsOtxrhsHHDa">
+        <h2 id="panelTitle" data-page-node-id="LfgR1iuGlyjXro3b1GvTmM">场景 A · 常见物质的分子结构</h2>
+        <p id="panelSub" data-page-node-id="N4HtK8uZvvYT8fztk2nK2x">点击任意分子查看知识卡，或点击底部「分子巡览」自动讲解。</p>
+      </div>
+      <div class="panel-body" id="panelBody" data-page-node-id="0XiFUrNodwNZZaSAC4ipY8"></div>
+    </div>
+  </div>
+
+  <!-- ================= 底部按钮条（按场景分组） ================= -->
+  <div id="bottombar" data-page-node-id="pviDnMjTOOG3joxtnWEXM3">
+    <!-- ===== 场景A：分子结构 ===== -->
+    <div class="toolgroup" data-scene="A" data-page-node-id="cVcXdma71tzGyntwuTvD11">
+      <span class="glabel" data-page-node-id="N8Ogk1fzGKg70HVPcjg8tl">场景 A</span>
+      <button class="btn primary" id="btnTour" data-page-node-id="ynOj0K1Qq772pk48zIRkCx">🔭 分子巡览</button>
+      <button class="btn" id="btnSpin" data-page-node-id="d3CNADTWJglOT36U2t2k6B">🔄 自动旋转</button>
+      <button class="btn" id="btnResetA" data-page-node-id="pyBml2jOKVVDpgLz4VHgjF">⟲ 复位视角</button>
+    </div>
+    <!-- ===== 场景B：反应实验 ===== -->
+    <div class="toolgroup" data-scene="B" data-page-node-id="VLQIBIWtPCnDqplfMLHZ1s">
+      <span class="glabel" data-page-node-id="gaVWzIBd6tlsMdJVVQ8JA8">场景 B</span>
+      <button class="btn primary" id="btnElec" data-page-node-id="H1AERniueILbxb6PCDGLFi">⚡ 通电电解</button>
+      <button class="btn warn" id="btnAcid" data-page-node-id="rI9GkFP6Ro8TgaKWZFv1vV">🧪 加入盐酸</button>
+      <button class="btn" id="btnResetB" data-page-node-id="JQ9FMHFclGrs70ibX3prY9">⟲ 重置实验</button>
+    </div>
+    <!-- ===== 场景C：微观世界 ===== -->
+    <div class="toolgroup" data-scene="C" data-page-node-id="oZFgHctupXrQPfcZeey4Zt">
+      <span class="glabel" data-page-node-id="gJXCj11rbqqrc0gUk2JIfO">场景 C</span>
+      <button class="btn primary" id="btnDecomp" data-page-node-id="mi3MUHBC4oE3Sbrxdvr2Uc">💧 分解反应</button>
+      <button class="btn warn" id="btnComb" data-page-node-id="sB4GQcX7PdcwN0zFdfj7FZ">🔥 化合反应</button>
+      <button class="btn" id="btnDouble" data-page-node-id="nbBiTalfdoQjP2AWb9KjrP">🪨 复分解反应</button>
+      <button class="btn" id="btnResetC" data-page-node-id="VdLyL0bKQhZ1KRfsPXRkgE">⟲ 清空重来</button>
+    </div>
+    <div class="spacer" data-page-node-id="XaaFK5YqrQ5SOL87pmylnM"></div>
+    <div id="progressWrap" data-page-node-id="QCQuqnsTXlPbopYXMtY1LL">
+      <span data-page-node-id="rdMzQptELy98Sag5GZRx7m">闯关进度 <b id="progText" data-page-node-id="n0MusVJujPAESVecXljwS3">0/6</b></span>
+      <span class="bar" data-page-node-id="lw67EM0sbOmjWgll6DXM6A"><i id="progBar" data-page-node-id="lG29pfRlGLHZMJRmefyUdy"></i></span>
+      <button class="btn" id="btnQuiz" style="padding:6px 12px;font-size:12.5px" data-page-node-id="R3pbeJFuRA5VEtj0KHxyQy">📝 随堂练习</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 选择题弹窗 ================= -->
+<div id="quizMask" data-page-node-id="RW828aTFCTVwE9965eLmVU">
+  <div id="quizBox" data-page-node-id="WFfkhugCwkUFM9yxgb4nS7">
+    <div class="qhead" data-page-node-id="PriQ6uTqh3JXDSejAGAbnv">
+      <div class="qno" id="qNo" data-page-node-id="1sGcD1HBDCYB8FDCmt25DY">第 1 题 / 共 6 题</div>
+      <div class="qclose" id="qClose" data-page-node-id="zVbDrqt8e0SReBvFiMH2kM">关闭</div>
+    </div>
+    <div class="qtitle" id="qTitle" data-page-node-id="Ncn3Fb63P12tznNtSs14F5"></div>
+    <div class="opts" id="qOpts" data-page-node-id="m7PnJ4g0vJvnWJFn3kVyxd"></div>
+    <div class="feedback" id="qFb" data-page-node-id="QWNCCsxAyUOnRNJYMloNhk"><span class="lab" data-page-node-id="E7oQUbhiSaFu2nCIQRYnfp"></span><span class="txt" data-page-node-id="dvShOGTti2HW1cZ1d6FBRg"></span></div>
+    <div class="qfoot" id="qFoot" data-page-node-id="xVawf1XGcZVyJWhQ5WR2Fs"></div>
+  </div>
+</div>
+
+<!-- ================= 通关面板 ================= -->
+<div id="finishMask" data-page-node-id="ZcG9CqJrNmM6ks2KYaiqnO">
+  <div id="finishBox" data-page-node-id="4AaGQP55pY8bisgjPP5xJU">
+    <div style="font-size:46px;line-height:1" data-page-node-id="jg62PVWGLgkvQB25sIVFyv">🎓</div>
+    <div class="big" data-page-node-id="LthUaScwznWfS2RF28O2Gc">全部通关！</div>
+    <div class="sub" data-page-node-id="0Wavtnqjc3wHtjWDhghSL3">6 道随堂练习全部答对。<br data-page-node-id="iC2TBDrNKKvDF7OVRjklmF">你已经掌握了常见物质的分子结构、两个经典实验<br data-page-node-id="Glo20AXL8BT6tVc7u8slk9">以及三种基本反应类型的微观本质。</div>
+    <div style="margin-top:20px" data-page-node-id="y8VmlQwqi7iNzMGAiDmE8L"><button class="btn primary" id="finClose" data-page-node-id="NdqnV8NEpA2stO7T7aKIgx">完成</button></div>
+  </div>
+</div>
+
+<!-- ================= 演示模式 ================= -->
+<div id="demoTip" data-page-node-id="tulXQPwfFARfXSQRDaMMXF">演示中… 点击任意处退出</div>
+<div id="summary" data-page-node-id="SBrTUk0XHyYPjJFWxy6ZzX">
+  <div class="line1" data-page-node-id="wpE6B1AdMfK38imGFccGID">把抽象的化学反应，</div>
+  <div class="line2" data-page-node-id="DGVFxP6eoFkikBvlMMfBgx">变成能看、能点、能提问的互动模型。</div>
+</div>
+
+<!-- ================= 加载 / 离线提示 ================= -->
+<div id="boot" data-page-node-id="l5x9D0HvvyaE4d3zS8q1Ut">
+  <div class="sp" data-page-node-id="D3T8UD4WrUsCMR1M5eHkCG"></div>
+  <div class="msg" data-page-node-id="G5B6Zzv2tetidoiCNZBWLE">正在加载 3D 课件引擎…<br  data-page-node-id="q5RtacSQlBqB9iUH7Wc57d"/>首次打开会优先使用本地离线包，其次从 CDN 获取</div>
+  <div class="err" data-page-node-id="SkVCmWQKMqjs7QK7TDEO7T">
+    <b data-page-node-id="nAp2Mup6f6XW4daSCYkuk4">⚠ 引擎加载失败</b><br  data-page-node-id="wfqWW2Sd79713pogleP0Ib"/>
+    本课件需要联网获取 three.js（或本地 <b data-page-node-id="ua90L2MbeDzxjy3QKjLrZA">libs/three.bundle.js</b>）。<br  data-page-node-id="TD0Ilh4F63MVSurSrfu8fS"/>
+    请检查网络连接后刷新页面，或把课件文件夹中的 <b data-page-node-id="GrA51Zj2kzPpFtLMWEAWDs">libs</b> 目录保留完整。
+  </div>
+</div>
+
+<!-- =====================================================================
+     ===== 引导层：three.js 双路径加载（本地离线包 → CDN ES Module） =====
+     ===================================================================== -->
+<script>
+(function () {
+  var BOOT = document.getElementById('boot');
+  var watchdog = setTimeout(function () {
+    BOOT.classList.add('failed');
+  }, 8000);                                   // 8 秒看门狗
+
+  /** 引擎就绪：调用业务入口 */
+  function ready(THREE) {
+    clearTimeout(watchdog);
+    BOOT.classList.add('hide');
+    try {
+      window.__CHEM_BOOT(THREE);
+    } catch (e) {
+      console.error('[课件] 初始化异常：', e);
+      BOOT.classList.remove('hide');
+      BOOT.classList.add('failed');
+      BOOT.querySelector('.err').innerHTML =
+        '<b>⚠ 初始化异常</b><br />' + (e && e.message ? e.message : e);
+    }
+  }
+
+  /** 路径 2：CDN（ES Module + importmap） */
+  function loadFromCDN() {
+    console.warn('[课件] 本地离线包不可用，改用 CDN 加载 three.js');
+    var s = document.createElement('script');
+    s.type = 'module';
+    s.textContent = [
+      "import * as THREE from 'three';",
+      "import { OrbitControls } from 'three/addons/controls/OrbitControls.js';",
+      "import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';",
+      "window.THREE = Object.assign(Object.assign({}, THREE),",
+      "  { OrbitControls: OrbitControls, GLTFLoader: GLTFLoader });",
+      "window.__CHEM_READY(window.THREE);"
+    ].join('\n');
+    s.onerror = function () { BOOT.classList.add('failed'); };
+    document.head.appendChild(s);
+  }
+  window.__CHEM_READY = ready;
+
+  /** 路径 1：本地离线包 libs/three.bundle.js（经典脚本，file:// 下可用） */
+  function loadLocal() {
+    var s = document.createElement('script');
+    s.src = '../assets/three.bundle.js';
+    s.onload = function () {
+      if (window.THREE && window.THREE.Scene) ready(window.THREE);
+      else loadFromCDN();
+    };
+    s.onerror = loadFromCDN;
+    document.head.appendChild(s);
+  }
+  loadLocal();
+})();
+</script>
+
+<script>
+/* =====================================================================
+   ===== 业务主逻辑 =====
+   结构：
+     0. 常量与数据表（元素配色 / MOL_DEFS / MOL_INFO / QUIZ）
+     1. 引擎初始化（渲染器 / 场景 / 相机 / 控制器 / 灯光）
+     2. 通用工具（球棍模型 / 标签 / 补间 / 粒子 / 玻璃器皿）
+     3. 场景 A：分子结构
+     4. 场景 B：反应实验（电解水 + 大理石与盐酸）
+     5. 场景 C：微观世界（分解 / 化合 / 复分解）
+     6. 随堂选择题闯关 + 解锁机制
+     7. 演示模式（25s 时间轴）
+     8. 启动
+   ===================================================================== */
+window.__CHEM_BOOT = function (THREE) {
+'use strict';
+
+/* =====================================================================
+   ===== 0. 常量与数据表（化学老师可直接修改这里） =====
+   ===================================================================== */
+
+/** 元素配色与半径（与页面左下角图例一一对应） */
+const ELEMENTS = {
+  O : { cn:'氧', color:0xff4d4d, r:0.40, emissive:0x4a1010 },  // 红
+  H : { cn:'氢', color:0xf2f6ff, r:0.26, emissive:0x2b3550 },  // 白
+  C : { cn:'碳', color:0x8a93a6, r:0.46, emissive:0x1e222b },  // 灰
+  Cl: { cn:'氯', color:0x3ddc84, r:0.44, emissive:0x0d3520 },  // 绿
+  Ca: { cn:'钙', color:0xa96bff, r:0.53, emissive:0x2c0d52 },  // 紫
+};
+
+/** 分子定义表 MOL_DEFS（场景 A）
+ *  atoms : [{el:'O', p:[x,y,z]}]
+ *  bonds : [[i, j, 键级]]  键级 1=单键 2=双键 3=三键 0=离子键(虚线)
+ */
+const MOL_DEFS = [
+  { key:'O2', formula:'O₂', name:'氧气',
+    atoms:[{el:'O',p:[-0.66,0,0]},{el:'O',p:[0.66,0,0]}],
+    bonds:[[0,1,2]] },
+
+  { key:'H2', formula:'H₂', name:'氢气',
+    atoms:[{el:'H',p:[-0.42,0,0]},{el:'H',p:[0.42,0,0]}],
+    bonds:[[0,1,1]] },
+
+  { key:'H2O', formula:'H₂O', name:'水',
+    atoms:[{el:'O',p:[0,0.12,0]},{el:'H',p:[0.78,-0.42,0]},{el:'H',p:[-0.78,-0.42,0]}],
+    bonds:[[0,1,1],[0,2,1]] },
+
+  { key:'CO2', formula:'CO₂', name:'二氧化碳',
+    atoms:[{el:'C',p:[0,0,0]},{el:'O',p:[1.18,0,0]},{el:'O',p:[-1.18,0,0]}],
+    bonds:[[0,1,2],[0,2,2]] },
+
+  { key:'HCl', formula:'HCl', name:'氯化氢',
+    atoms:[{el:'H',p:[-0.72,0,0]},{el:'Cl',p:[0.52,0,0]}],
+    bonds:[[0,1,1]] },
+
+  { key:'CaCO3', formula:'CaCO₃', name:'碳酸钙',
+    atoms:[{el:'Ca',p:[0,1.30,0]},{el:'C',p:[0,-0.10,0]},
+           {el:'O',p:[1.12,-0.28,0]},{el:'O',p:[-0.56,-0.28,0.97]},{el:'O',p:[-0.56,-0.28,-0.97]}],
+    bonds:[[1,2,2],[1,3,1],[1,4,1],[0,2,0]] },
+];
+
+/** 分子知识卡文案表 MOL_INFO */
+const MOL_INFO = {
+  O2:'氧气由两个氧原子构成，化学式 O₂。<br>它是空气中体积分数约 21% 的气体，能支持燃烧和供给呼吸。<br>检验方法：把带火星的木条伸入，木条复燃。',
+  H2:'氢气由两个氢原子构成，化学式 H₂。<br>它是密度最小的气体，具有可燃性，燃烧产物只有水，是理想的清洁能源。<br>混有空气时点燃可能爆鸣，点燃前必须验纯。',
+  H2O:'一个水分子由 2 个氢原子和 1 个氧原子构成，化学式 H₂O。<br>水分子呈 V 形（键角约 104.5°），属于共价化合物。<br>通电可以分解生成氢气和氧气。',
+  CO2:'一个二氧化碳分子由 1 个碳原子和 2 个氧原子构成，化学式 CO₂。<br>分子呈直线形，碳氧之间为双键。<br>能使澄清石灰水变浑浊，这是它的特征检验方法。',
+  HCl:'氯化氢由 1 个氢原子和 1 个氯原子构成，化学式 HCl。<br>它的水溶液就是盐酸，属于强酸，能与活泼金属、碳酸盐反应。<br>浓盐酸有挥发性，瓶口会出现白雾。',
+  CaCO3:'碳酸钙由钙离子 Ca²⁺ 和碳酸根离子 CO₃²⁻ 构成，化学式 CaCO₃。<br>它是大理石、石灰石的主要成分，难溶于水。<br>与稀盐酸反应会放出二氧化碳气体。',
+};
+
+/** 场景 B 的两个方程式（右侧面板常显） */
+const EQ_B = {
+  elec:{ main:'2H₂O —通电→ 2H₂↑ + O₂↑', note:'口诀：正氧负氢', tip:'负极（H₂）与正极（O₂）气体体积比 ≈ 2 : 1' },
+  acid:{ main:'CaCO₃ + 2HCl → CaCl₂ + H₂O + CO₂↑', note:'现象：固体溶解，产生大量气泡',
+         tip:'CO₂ + Ca(OH)₂ → CaCO₃↓ + H₂O（石灰水变浑浊）' },
+};
+
+/** 场景 C 三个反应：原子级动画数据
+ *  atoms : [{el, from:[x,y,z], to:[x,y,z]}]
+ *  b1 / b2: 起始键 / 产物键  [[原子下标i, 原子下标j, 键级]]
+ *  lab1 / lab2 : 起始标签 / 产物标签  [{t:文本, p:[x,y,z]}]
+ */
+const RX_DEFS = {
+  /* --- 分解反应：2H₂O → 2H₂ + O₂ --- */
+  decomp:{
+    title:'分解反应 · 电解水', eq:'2H₂O —通电→ 2H₂↑ + O₂↑',
+    atoms:[
+      {el:'H', from:[-2.45,0.55,0], to:[-2.90,-1.30,0]},
+      {el:'O', from:[-1.80,1.10,0], to:[ 2.05,-1.30,0]},
+      {el:'H', from:[-1.15,0.55,0], to:[-2.30,-1.30,0]},
+      {el:'O', from:[ 1.80,1.10,0], to:[ 2.75,-1.30,0]},
+      {el:'H', from:[ 1.15,0.55,0], to:[-0.35,-1.30,0]},
+      {el:'H', from:[ 2.45,0.55,0], to:[ 0.35,-1.30,0]},
+    ],
+    b1:[[0,1,1],[1,2,1],[3,4,1],[3,5,1]],
+    b2:[[0,2,1],[4,5,1],[1,3,2]],
+    lab1:[{t:'H₂O',p:[-1.80,2.05,0]},{t:'H₂O',p:[1.80,2.05,0]}],
+    lab2:[{t:'H₂',p:[-2.60,-2.05,0]},{t:'H₂',p:[0,-2.05,0]},{t:'O₂',p:[2.40,-2.05,0]}],
+    flash:'#4fd1c5',
+  },
+  /* --- 化合反应：2H₂ + O₂ → 2H₂O --- */
+  comb:{
+    title:'化合反应 · 氢气燃烧', eq:'2H₂ + O₂ —点燃→ 2H₂O',
+    atoms:[
+      {el:'H', from:[-2.95,1.20,0], to:[-1.95,-1.70,0]},
+      {el:'H', from:[-2.25,1.20,0], to:[-0.65,-1.70,0]},
+      {el:'H', from:[-0.35,1.20,0], to:[ 0.65,-1.70,0]},
+      {el:'H', from:[ 0.35,1.20,0], to:[ 1.95,-1.70,0]},
+      {el:'O', from:[ 2.05,1.20,0], to:[-1.30,-1.15,0]},
+      {el:'O', from:[ 2.75,1.20,0], to:[ 1.30,-1.15,0]},
+    ],
+    b1:[[0,1,1],[2,3,1],[4,5,2]],
+    b2:[[4,0,1],[4,1,1],[5,2,1],[5,3,1]],
+    lab1:[{t:'H₂',p:[-2.60,2.05,0]},{t:'H₂',p:[0,2.05,0]},{t:'O₂',p:[2.40,2.05,0]}],
+    lab2:[{t:'H₂O',p:[-1.30,-2.35,0]},{t:'H₂O',p:[1.30,-2.35,0]}],
+    flash:'#ff9f43',
+  },
+  /* --- 复分解反应：CaCO₃ + 2HCl → CaCl₂ + H₂O + CO₂↑ --- */
+  dbl:{
+    title:'复分解反应 · 碳酸钙与盐酸', eq:'CaCO₃ + 2HCl → CaCl₂ + H₂O + CO₂↑',
+    atoms:[
+      {el:'Ca',from:[-2.80, 1.75, 0.00], to:[-3.00,-1.50,0]},
+      {el:'C', from:[-2.80, 0.55, 0.00], to:[ 3.10,-1.50,0]},
+      {el:'O', from:[-3.75, 0.35, 0.00], to:[ 2.65,-1.50,0]},
+      {el:'O', from:[-2.35, 0.35, 0.95], to:[ 0.20,-1.15,0]},
+      {el:'O', from:[-2.35, 0.35,-0.95], to:[ 3.55,-1.50,0]},
+      {el:'H', from:[ 0.85, 1.50, 0.60], to:[-0.35,-1.85,0]},
+      {el:'Cl',from:[ 1.65, 1.50, 0.60], to:[-3.75,-1.50,0]},
+      {el:'H', from:[ 0.85, 0.40,-0.60], to:[ 0.75,-1.85,0]},
+      {el:'Cl',from:[ 1.65, 0.40,-0.60], to:[-2.25,-1.50,0]},
+    ],
+    b1:[[1,2,2],[1,3,1],[1,4,1],[0,2,0],[5,6,1],[7,8,1]],
+    b2:[[0,6,0],[0,8,0],[3,5,1],[3,7,1],[1,2,2],[1,4,2]],
+    lab1:[{t:'CaCO₃',p:[-2.80,2.45,0]},{t:'2HCl',p:[1.25,2.20,0]}],
+    lab2:[{t:'CaCl₂',p:[-3.00,-2.30,0]},{t:'H₂O',p:[0.20,-2.30,0]},{t:'CO₂',p:[3.10,-2.30,0]}],
+    flash:'#a96bff',
+    floatProduct:2,          // 第 3 个产物（CO₂）带上浮气泡光晕
+    floatAtoms:[1, 2, 4],    // 构成 CO₂ 的原子下标（C 与两个 O），上浮前先隐藏
+  },
+};
+
+/** 题库 QUIZ：每场景 2 题，共 6 题 */
+const QUIZ = [
+  /* ===== 场景 A ===== */
+  { scene:'A', q:'下列关于氧气（O₂）的说法，正确的是？',
+    opts:['氧气能使带火星的木条复燃','氧气是可燃性气体','氧气能使澄清石灰水变浑浊','氧气是无色无味的液体'],
+    ans:0, why:'氧气具有助燃性，能使带火星的木条复燃，这是检验氧气的方法。氧气本身不可燃；使石灰水变浑浊是 CO₂ 的性质；常温下氧气是气体。' },
+  { scene:'A', q:'一个水分子（H₂O）中含有的原子总数是？',
+    opts:['2 个','3 个','4 个','5 个'],
+    ans:1, why:'H₂O 由 2 个氢原子和 1 个氧原子构成，共 3 个原子。右下角的数字 2 表示氢原子的个数。' },
+
+  /* ===== 场景 B ===== */
+  { scene:'B', q:'电解水实验中，正极与负极产生的气体分别是？',
+    opts:['正极 H₂，负极 O₂','正极 O₂，负极 H₂','两极都是 O₂','两极都是 H₂'],
+    ans:1, why:'口诀「正氧负氢」：正极产生氧气，负极产生氢气，且氢气与氧气的体积比约为 2 : 1。' },
+  { scene:'B', q:'检验二氧化碳气体常用的试剂是？',
+    opts:['澄清石灰水','紫色石蕊试液','带火星的木条','肥皂水'],
+    ans:0, why:'CO₂ 能使澄清石灰水变浑浊（生成难溶的 CaCO₃ 沉淀），这是二氧化碳的特征检验方法。' },
+
+  /* ===== 场景 C ===== */
+  { scene:'C', q:'反应「2H₂O —通电→ 2H₂↑ + O₂↑」属于哪种基本反应类型？',
+    opts:['化合反应','分解反应','复分解反应','置换反应'],
+    ans:1, why:'分解反应由一种物质生成两种或两种以上其他物质，特征是「一变多」。' },
+  { scene:'C', q:'石灰水变浑浊的原因是生成了？',
+    opts:['可溶的 CaCl₂','难溶的 CaCO₃ 沉淀','可溶的 Ca(OH)₂','难溶的 CaO'],
+    ans:1, why:'CO₂ + Ca(OH)₂ → CaCO₃↓ + H₂O，生成的碳酸钙难溶于水，形成白色沉淀使液体变浑浊。' },
+];
+
+/** GLB 扩展口：填入路径后自动加载，失败则回退程序化几何体 */
+const GLB_PATHS = { A:'', B:'', C:'' };
+
+/* =====================================================================
+   ===== 1. 引擎初始化（单渲染器 + 三场景 + 单相机） =====
+   ===================================================================== */
+const viewport = document.getElementById('viewport');
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.06;
+viewport.appendChild(renderer.domElement);
+
+const camera = new THREE.PerspectiveCamera(42, viewport.clientWidth / viewport.clientHeight, 0.1, 200);
+camera.position.set(0, 0, 13);
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 4;
+controls.maxDistance = 30;
+controls.autoRotateSpeed = 0.9;
+controls.target.set(0, 0, 0);
+
+/** 三个场景共用渲染器，切换只换 Scene 内容 */
+const scenes = { A:new THREE.Scene(), B:new THREE.Scene(), C:new THREE.Scene() };
+Object.keys(scenes).forEach(function (k) {
+  const s = scenes[k];
+  s.add(new THREE.AmbientLight(0xbcd4f0, 0.55));
+  const key = new THREE.DirectionalLight(0xffffff, 1.15); key.position.set(5, 8, 9); s.add(key);
+  const fill = new THREE.DirectionalLight(0x4fd1c5, 0.45); fill.position.set(-7, -3, 5); s.add(fill);
+  const rim = new THREE.PointLight(0xff9f43, 0.7, 40); rim.position.set(0, -4, -8); s.add(rim);
+  // 地面网格（增强空间感）
+  const grid = new THREE.GridHelper(40, 40, 0x1e3a5f, 0x14243d);
+  grid.position.y = -4.2; grid.material.transparent = true; grid.material.opacity = 0.5;
+  s.add(grid);
+});
+let currentScene = 'A';
+
+/* =====================================================================
+   ===== 2. 通用工具 =====
+   ===================================================================== */
+const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+/** 缓动：进出平滑 */
+const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+
+/** 共享几何体，减少开销 */
+const GEO_SPHERE = new THREE.SphereGeometry(1, 28, 20);
+const GEO_CYL = new THREE.CylinderGeometry(1, 1, 1, 20);
+const GEO_CYL_8 = new THREE.CylinderGeometry(1, 1, 1, 10);
+
+/** 生成一个原子球 */
+function makeAtom(el) {
+  const E = ELEMENTS[el];
+  const m = new THREE.Mesh(GEO_SPHERE, new THREE.MeshStandardMaterial({
+    color: E.color, emissive: E.emissive, emissiveIntensity: 0.42,
+    roughness: 0.34, metalness: 0.16,
+  }));
+  m.scale.setScalar(E.r);
+  m.userData.el = el;
+  return m;
+}
+
+/** 生成一根化学键：order 1单 2双 3三 0离子键(虚线) */
+function makeBond(a, b, order) {
+  const g = new THREE.Group();
+  const dir = new THREE.Vector3().subVectors(b, a);
+  const len = dir.length();
+  const mid = new THREE.Vector3().addVectors(a, b).multiplyScalar(0.5);
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xa8bed6, emissive: 0x223349, emissiveIntensity: 0.5,
+    roughness: 0.45, metalness: 0.2, transparent: true, opacity: 1,
+  });
+  const q = new THREE.Quaternion().setFromUnitVectors(V3(0, 1, 0), dir.clone().normalize());
+
+  function stick(offsetVec, radius, height) {
+    const m = new THREE.Mesh(GEO_CYL_8, mat);
+    m.scale.set(radius, height, radius);
+    m.quaternion.copy(q);
+    m.position.copy(mid).add(offsetVec);
+    return m;
+  }
+  // 取一个与键方向垂直的向量，用于双/三键的偏移
+  const up = Math.abs(dir.y) > 0.9 * len ? V3(1, 0, 0) : V3(0, 1, 0);
+  const perp = new THREE.Vector3().crossVectors(dir, up).normalize();
+
+  if (order === 0) {
+    // 离子键：虚线（若干小段）
+    const seg = 6;
+    for (let i = 0; i < seg; i++) {
+      const t = (i + 0.5) / seg;
+      const p = new THREE.Vector3().lerpVectors(a, b, t);
+      const m = new THREE.Mesh(GEO_CYL_8, mat);
+      m.scale.set(0.042, len / (seg * 1.9), 0.042);
+      m.quaternion.copy(q);
+      m.position.copy(p);
+      g.add(m);
+    }
+  } else if (order === 1) {
+    g.add(stick(V3(0, 0, 0), 0.07, len));
+  } else {
+    const n = order, span = 0.1;
+    for (let i = 0; i < n; i++) {
+      const off = (i - (n - 1) / 2) * span;
+      g.add(stick(perp.clone().multiplyScalar(off * 2.2), 0.052, len));
+    }
+  }
+  g.userData.bondMat = mat;
+  return g;
+}
+
+/** 半透明玻璃材质 */
+function glassMat(color, opacity) {
+  return new THREE.MeshPhysicalMaterial({
+    color: color || 0xbfe6ff, transparent: true, opacity: opacity === undefined ? 0.22 : opacity,
+    roughness: 0.08, metalness: 0.0, transmission: 0.55, thickness: 0.6,
+    side: THREE.DoubleSide, depthWrite: false,
+  });
+}
+
+/* ---- 屏幕投影 HTML 标签 ---- */
+const labelLayer = document.getElementById('labelLayer');
+const TAGS = [];
+/**
+ * @param {string} text 主文本
+ * @param {string} sub  副文本（可空）
+ * @param {THREE.Vector3} pos 世界坐标
+ * @param {string} scene 归属场景 A/B/C
+ * @param {function} onClick 点击回调
+ * @param {string} cls 额外样式：hl（高亮）/ product（产物）
+ */
+function addTag(text, sub, pos, scene, onClick, cls) {
+  const el = document.createElement('div');
+  el.className = 'tag3d' + (cls ? ' ' + cls : '');
+  el.innerHTML = text + (sub ? '<span class="sub">' + sub + '</span>' : '');
+  if (onClick) el.addEventListener('click', function (e) { e.stopPropagation(); onClick(); });
+  labelLayer.appendChild(el);
+  const tag = { el: el, pos: pos.clone(), scene: scene, alive: true };
+  TAGS.push(tag);
+  return tag;
+}
+/** 每帧把 3D 坐标投影到屏幕 */
+const _pv = new THREE.Vector3();
+function updateTags() {
+  const w = viewport.clientWidth, h = viewport.clientHeight;
+  for (let i = 0; i < TAGS.length; i++) {
+    const t = TAGS[i];
+    if (!t.alive || t.scene !== currentScene) { t.el.style.display = 'none'; continue; }
+    _pv.copy(t.pos).project(camera);
+    if (_pv.z > 1 || _pv.z < -1) { t.el.style.display = 'none'; continue; }
+    t.el.style.display = 'block';
+    t.el.style.left = ((_pv.x * 0.5 + 0.5) * w).toFixed(1) + 'px';
+    t.el.style.top = ((-_pv.y * 0.5 + 0.5) * h).toFixed(1) + 'px';
+  }
+}
+
+/* ---- 相机补间（平滑过渡） ---- */
+const camTween = { active:false, t:0, dur:0.5, p0:new THREE.Vector3(), p1:new THREE.Vector3(), t0:new THREE.Vector3(), t1:new THREE.Vector3() };
+function flyTo(pos, target, dur) {
+  camTween.p0.copy(camera.position); camTween.p1.copy(pos);
+  camTween.t0.copy(controls.target); camTween.t1.copy(target);
+  camTween.dur = dur === undefined ? 0.5 : dur;
+  camTween.t = 0; camTween.active = true;
+}
+function updateCamTween(dt) {
+  if (!camTween.active) return;
+  camTween.t += dt;
+  let k = clamp(camTween.t / camTween.dur, 0, 1);
+  k = easeInOut(k);
+  camera.position.lerpVectors(camTween.p0, camTween.p1, k);
+  controls.target.lerpVectors(camTween.t0, camTween.t1, k);
+  if (camTween.t >= camTween.dur) camTween.active = false;
+}
+
+/* ---- 状态胶囊 ---- */
+const capsuleEl = document.getElementById('capsule');
+let capsuleTimer = 0;
+function capsule(text, hot, autoHide) {
+  capsuleEl.textContent = text;
+  capsuleEl.classList.add('show');
+  capsuleEl.classList.toggle('hot', !!hot);
+  if (autoHide) { clearTimeout(capsuleTimer); capsuleTimer = setTimeout(function () { capsuleEl.classList.remove('show'); }, autoHide); }
+}
+function hideCapsule() { capsuleEl.classList.remove('show'); }
+
+/* ---- GLB 加载（带程序化兜底） ---- */
+const loader = new THREE.GLTFLoader();
+function tryLoadGLB(path, sceneKey, onDone, onFail) {
+  if (!path) { onFail && onFail(); return null; }
+  loader.load(path, function (gltf) {
+    const obj = gltf.scene;
+    onDone && onDone(obj, gltf.animations || []);
+  }, undefined, function () {
+    console.warn('[课件] GLB 加载失败，使用程序化模型：' + path);
+    onFail && onFail();
+  });
+  return null;
+}
+
+/* =====================================================================
+   ===== 场景 A：分子结构 =====
+   ===================================================================== */
+const A = { mols: [], selected: null, tourOn: false, tourIdx: 0, tourT: 0 };
+const A_HOME = { pos: V3(0, 0.6, 13), target: V3(0, 0, 0) };
+const A_SLOTS = [                       // 两行三列
+  V3(-4.15, 2.05, 0), V3(0, 2.05, 0), V3(4.15, 2.05, 0),
+  V3(-4.15, -1.75, 0), V3(0, -1.75, 0), V3(4.15, -1.75, 0),
+];
+
+function initSceneA() {
+  const s = scenes.A;
+  MOL_DEFS.forEach(function (def, i) {
+    const g = new THREE.Group();
+    g.position.copy(A_SLOTS[i]);
+    g.userData.molKey = def.key;
+
+    const atomMeshes = [];
+    def.atoms.forEach(function (a) {
+      const m = makeAtom(a.el);
+      m.position.set(a.p[0], a.p[1], a.p[2]);
+      g.add(m); atomMeshes.push(m);
+    });
+    (def.bonds || []).forEach(function (b) {
+      const pa = V3(def.atoms[b[0]].p[0], def.atoms[b[0]].p[1], def.atoms[b[0]].p[2]);
+      const pb = V3(def.atoms[b[1]].p[0], def.atoms[b[1]].p[1], def.atoms[b[1]].p[2]);
+      g.add(makeBond(pa, pb, b[2]));
+    });
+
+    s.add(g);
+    const item = { def: def, group: g, atoms: atomMeshes, baseScale: 1, hl: 0 };
+    A.mols.push(item);
+
+    // 分子下方标签
+    const lp = A_SLOTS[i].clone().add(V3(0, -1.55, 0));
+    item.tag = addTag(def.formula, def.name, lp, 'A', function () { selectMol(def.key); });
+  });
+
+  // 场景标题标签
+  addTag('常见物质的分子结构', '', V3(0, 4.4, 0), 'A', null, 'hl');
+
+  // GLB 扩展口（填入路径后自动接管）
+  tryLoadGLB(GLB_PATHS.A, 'A', function (obj) {
+    scenes.A.add(obj); obj.position.set(0, 0, -4);
+    console.log('[课件] 场景A 已加载 GLB 模型');
+  }, function () { });
+
+  // 射线拾取
+  const ray = new THREE.Raycaster();
+  const ndc = new THREE.Vector2();
+  let downXY = null;
+  renderer.domElement.addEventListener('pointerdown', function (e) { downXY = [e.clientX, e.clientY]; });
+  renderer.domElement.addEventListener('pointerup', function (e) {
+    if (currentScene !== 'A' || !downXY) return;
+    if (Math.abs(e.clientX - downXY[0]) > 5 || Math.abs(e.clientY - downXY[1]) > 5) return; // 拖拽不触发
+    const r = renderer.domElement.getBoundingClientRect();
+    ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+    ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+    ray.setFromCamera(ndc, camera);
+    const hits = ray.intersectObjects(scenes.A.children, true);
+    for (let i = 0; i < hits.length; i++) {
+      let o = hits[i].object;
+      while (o && !o.userData.molKey) o = o.parent;
+      if (o && o.userData.molKey) { selectMol(o.userData.molKey); return; }
+    }
+  });
+  // 注：双击复位统一在下方全局绑定（按当前场景复位）
+}
+
+/** 选中某个分子：高亮 + 聚焦 + 知识卡 */
+function selectMol(key) {
+  A.mols.forEach(function (m) { m.hl = (m.def.key === key) ? 1 : 0; });
+  const item = A.mols.filter(function (m) { return m.def.key === key; })[0];
+  if (!item) return;
+  A.selected = key;
+  // 相机聚焦
+  const p = item.group.position;
+  flyTo(V3(p.x, p.y + 0.4, p.z + 6.0), V3(p.x, p.y, p.z), 0.5);
+  showMolCard(key);
+  capsule('已选中：' + item.def.name + ' ' + item.def.formula, true, 2200);
+}
+/** 渲染知识卡到右侧面板 */
+function showMolCard(key) {
+  const def = MOL_DEFS.filter(function (d) { return d.key === key; })[0];
+  const body = document.getElementById('panelBody');
+  body.innerHTML =
+    '<div class="sec"><div class="molcard">' +
+      '<div class="f">' + def.formula + '</div>' +
+      '<div class="n">' + def.name + '</div>' +
+      '<div class="d">' + (MOL_INFO[key] || '') + '</div>' +
+    '</div></div>' +
+    '<div class="sec"><h3>原子组成</h3><div class="kv">' +
+      atomSummary(def) +
+    '</div></div>' +
+    '<div class="sec"><h3>操作提示</h3><p>再次点击其它分子可切换；点击底部「分子巡览」可自动依次讲解 6 种物质。</p></div>';
+}
+function atomSummary(def) {
+  const map = {};
+  def.atoms.forEach(function (a) { map[a.el] = (map[a.el] || 0) + 1; });
+  return Object.keys(map).map(function (k) {
+    return '<b>' + ELEMENTS[k].cn + '（' + k + '）</b> × ' + map[k];
+  }).join('<br>');
+}
+/** 场景 A 默认面板 */
+function panelA() {
+  document.getElementById('panelBody').innerHTML =
+    '<div class="sec"><h3>本场景知识点</h3><p>物质由分子、原子等微观粒子构成。不同物质的分子，其原子的<b>种类、个数和结合方式</b>不同，性质也就不同。</p></div>' +
+    '<div class="sec"><h3>元素配色</h3><div class="kv">' +
+      'O 氧 <span style="color:#ff4d4d">●</span> 红　H 氢 <span style="color:#f2f6ff">●</span> 白<br>' +
+      'C 碳 <span style="color:#8a93a6">●</span> 灰　Cl 氯 <span style="color:#3ddc84">●</span> 绿<br>' +
+      'Ca 钙 <span style="color:#a96bff">●</span> 紫' +
+    '</div></div>' +
+    '<div class="sec"><h3>操作方式</h3><p>拖拽旋转 · 滚轮缩放 · 双击复位 · 点击分子或标签查看知识卡</p></div>' +
+    '<div class="sec"><h3>学习任务</h3><p>观察 6 种物质的分子模型，说出它们的原子个数与化学键类型，然后完成本场景的 2 道随堂练习。</p></div>';
+}
+/** 分子巡览：依次聚焦每种物质（每个约 1.5s） */
+function startTour() {
+  A.tourOn = true; A.tourIdx = -1; A.tourT = 1.4;   // 立刻进入第一个
+  document.getElementById('btnTour').classList.add('on');
+  document.getElementById('btnTour').textContent = '⏹ 停止巡览';
+  capsule('分子巡览中…', true);
+}
+function stopTour() {
+  A.tourOn = false;
+  const b = document.getElementById('btnTour');
+  b.classList.remove('on'); b.textContent = '🔭 分子巡览';
+  flyTo(A_HOME.pos, A_HOME.target, 0.6);
+  hideCapsule();
+}
+function updateA(dt, t) {
+  // 高亮脉冲
+  A.mols.forEach(function (m) {
+    const pulse = m.hl ? 1 + 0.055 * Math.sin(t * 6) : 1;
+    m.group.scale.setScalar(m.baseScale * pulse);
+    m.atoms.forEach(function (a) {
+      a.material.emissiveIntensity = m.hl ? 0.85 + 0.35 * Math.sin(t * 6) : 0.42;
+    });
+    if (m.tag) m.tag.el.classList.toggle('hl', !!m.hl);
+  });
+  // 巡览
+  if (A.tourOn) {
+    A.tourT += dt;
+    if (A.tourT >= 1.5) {
+      A.tourT = 0; A.tourIdx++;
+      if (A.tourIdx >= A.mols.length) { stopTour(); panelA(); return; }
+      selectMol(A.mols[A.tourIdx].def.key);
+    }
+  }
+}
+
+/* =====================================================================
+   ===== 场景 B：反应实验（电解水 / 碳酸钙与稀盐酸） =====
+   ===================================================================== */
+const B = {
+  running: null,        // null | 'elec' | 'acid'
+  elecT: 0, acidT: 0,
+  gasH: null, gasO: null,     // 试管内气体柱
+  hBub: [], oBub: [],         // 电解气泡（白 : 红 = 12 : 6，体现 2:1）
+  co2Bub: [], ductBub: [],    // 大理石气泡 / 导管内气泡
+  acidLiq: null, lime: null,  // 盐酸液面 / 澄清石灰水
+  marbles: [], curve: null,
+};
+const CLEAR_WATER = new THREE.Color(0xdff3ff);
+const MILKY = new THREE.Color(0xf4f4ea);
+const B_HOME = { pos: V3(0, 1.0, 13.5), target: V3(0, -0.3, 0) };
+
+/** 造一组上浮气泡 */
+function makeBubbles(parent, count, color, size, cfg) {
+  const arr = [];
+  for (let i = 0; i < count; i++) {
+    const m = new THREE.Mesh(GEO_SPHERE, new THREE.MeshStandardMaterial({
+      color: color, emissive: color, emissiveIntensity: 0.55,
+      transparent: true, opacity: 0.85, roughness: 0.15, depthWrite: false,
+    }));
+    m.scale.setScalar(size * (0.7 + Math.random() * 0.6));
+    m.visible = false;
+    parent.add(m);
+    arr.push({
+      m: m, t: Math.random(), sp: 0.38 + Math.random() * 0.22,
+      x: cfg.x + (Math.random() - 0.5) * cfg.sx,
+      z: cfg.z + (Math.random() - 0.5) * cfg.sz,
+      ph: Math.random() * 6.28, amp: cfg.amp || 0.05,
+      y0: cfg.y0, y1: cfg.y1,
+    });
+  }
+  return arr;
+}
+function updateBubbles(arr, dt, on) {
+  for (let i = 0; i < arr.length; i++) {
+    const b = arr[i];
+    if (!on) { b.m.visible = false; b.t = Math.random(); continue; }
+    b.m.visible = true;
+    b.t += dt * b.sp;
+    if (b.t > 1) b.t -= 1;
+    b.m.position.set(b.x + b.amp * Math.sin(b.t * 9 + b.ph), b.y0 + (b.y1 - b.y0) * b.t, b.z);
+    b.m.material.opacity = 0.9 * (1 - b.t * 0.3);
+  }
+}
+
+function initSceneB() {
+  const s = scenes.B;
+
+  /* ---------- 装置 1：水电解器（左） ---------- */
+  const g1 = new THREE.Group(); g1.position.set(-4.3, -0.5, 0); s.add(g1);
+
+  // 玻璃水槽
+  const tank = new THREE.Mesh(new THREE.BoxGeometry(2.7, 1.7, 1.5), glassMat(0xbfe6ff, 0.16));
+  g1.add(tank);
+  // 槽中的水
+  const water = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.15, 1.3),
+    new THREE.MeshStandardMaterial({ color: 0x2e7fd4, transparent: true, opacity: 0.3, roughness: 0.2, depthWrite: false }));
+  water.position.y = -0.27; g1.add(water);
+  // 两个电极（碳棒）
+  const elecMat = new THREE.MeshStandardMaterial({ color: 0x22303f, emissive: 0x0d1a24, roughness: 0.6, metalness: 0.4 });
+  [-0.58, 0.58].forEach(function (x) {
+    const e = new THREE.Mesh(GEO_CYL, elecMat);
+    e.scale.set(0.075, 1.15, 0.075); e.position.set(x, -0.02, 0); g1.add(e);
+  });
+  // 两根倒扣试管 + 气体柱
+  const tubeMat = glassMat(0xcfeaff, 0.2);
+  function makeTube(x) {
+    const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.33, 0.33, 1.55, 24, 1, true), tubeMat);
+    tube.position.set(x, 0.98, 0); g1.add(tube);
+    const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.33, 0.33, 0.07, 24), tubeMat);
+    cap.position.set(x, 1.79, 0); g1.add(cap);
+    // 气体柱：几何体锚点移到顶端，便于从上往下"生长"
+    const gg = new THREE.CylinderGeometry(0.29, 0.29, 1, 20);
+    gg.translate(0, -0.5, 0);
+    const gas = new THREE.Mesh(gg, new THREE.MeshStandardMaterial({
+      color: 0xdff3ff, emissive: 0x2a4a63, emissiveIntensity: 0.5,
+      transparent: true, opacity: 0.55, roughness: 0.1, depthWrite: false,
+    }));
+    gas.position.set(x, 1.74, 0); gas.scale.y = 0.001; g1.add(gas);
+    return gas;
+  }
+  B.gasH = makeTube(-0.58);   // 负极 → H₂
+  B.gasO = makeTube(0.58);    // 正极 → O₂
+  // 气泡：H₂ 12 个、O₂ 6 个 ⇒ 频率比 2 : 1
+  B.hBub = makeBubbles(g1, 12, 0xf2f6ff, 0.075, { x:-0.58, sx:0.16, z:0, sz:0.4, y0:-0.55, y1:1.55, amp:0.05 });
+  B.oBub = makeBubbles(g1, 6, 0xff4d4d, 0.075, { x: 0.58, sx:0.16, z:0, sz:0.4, y0:-0.55, y1:1.55, amp:0.05 });
+  // 电源盒 + 导线
+  const box = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.5, 0.6),
+    new THREE.MeshStandardMaterial({ color: 0x1b2836, emissive: 0x0a1420, roughness: 0.7, metalness: 0.3 }));
+  box.position.set(0, -1.55, -0.85); g1.add(box);
+  const ledMat = new THREE.MeshStandardMaterial({ color: 0x3a2a12, emissive: 0x000000, emissiveIntensity: 1 });
+  const led = new THREE.Mesh(GEO_SPHERE, ledMat); led.scale.setScalar(0.075);
+  led.position.set(0.3, -1.42, -0.54); g1.add(led); B.led = ledMat;
+  const wireMat = new THREE.MeshStandardMaterial({ color: 0x39485c, roughness: 0.6, metalness: 0.4 });
+  [-0.58, 0.58].forEach(function (x) {
+    const curve = new THREE.CatmullRomCurve3([
+      V3(x * 0.6, -1.35, -0.7), V3(x * 1.05, -1.0, -0.3), V3(x, -0.6, 0), V3(x, -0.3, 0),
+    ]);
+    g1.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 24, 0.028, 8, false), wireMat));
+  });
+  // 标签
+  addTag('负极 · H₂', '', V3(-4.88, 2.25, 0), 'B', null);
+  addTag('正极 · O₂', '', V3(-3.72, 2.25, 0), 'B', null);
+  addTag('水电解器', '', V3(-4.3, -2.75, 0), 'B', null, 'hl');
+  addTag('直流电源', '', V3(-4.3, -1.35, -0.85), 'B', null);
+
+  /* ---------- 装置 2：锥形瓶 + 石灰水（右） ---------- */
+  const g2 = new THREE.Group(); g2.position.set(2.9, -0.5, 0); s.add(g2);
+  // 锥形瓶（瓶身 + 瓶颈）
+  const flask = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 1.18, 1.55, 26, 1, true), glassMat(0xcfeaff, 0.2));
+  flask.position.y = -0.22; g2.add(flask);
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.55, 20, 1, true), glassMat(0xcfeaff, 0.2));
+  neck.position.y = 0.78; g2.add(neck);
+  // 盐酸液体（pivot 在底部，便于液面上升）
+  const lg = new THREE.CylinderGeometry(0.54, 1.12, 1, 26); lg.translate(0, 0.5, 0);
+  B.acidLiq = new THREE.Mesh(lg, new THREE.MeshStandardMaterial({
+    color: 0x6fe9ff, emissive: 0x0d3a48, emissiveIntensity: 0.5,
+    transparent: true, opacity: 0.28, roughness: 0.15, depthWrite: false,
+  }));
+  B.acidLiq.position.y = -0.95; B.acidLiq.scale.y = 0.001; B.acidLiq.visible = false; g2.add(B.acidLiq);
+  // 大理石碎块
+  const marbleMat = new THREE.MeshStandardMaterial({ color: 0xe8e4da, emissive: 0x2a2620, roughness: 0.75, metalness: 0.05 });
+  [[-0.32, -0.86, 0.22, 0.26], [0.28, -0.9, -0.14, 0.24], [0.0, -0.82, -0.32, 0.21], [-0.05, -0.9, 0.42, 0.18]].forEach(function (c) {
+    const m = new THREE.Mesh(new THREE.IcosahedronGeometry(c[3], 0), marbleMat);
+    m.position.set(c[0], c[1], c[2]); m.rotation.set(Math.random(), Math.random(), Math.random());
+    g2.add(m); B.marbles.push({ m: m, s0: 1 });
+  });
+  // 导管（瓶口 → 石灰水试管）
+  B.curve = new THREE.CatmullRomCurve3([
+    V3(0.0, 1.05, 0), V3(0.55, 1.45, 0), V3(1.35, 1.4, 0),
+    V3(1.95, 0.85, 0), V3(2.1, 0.1, 0), V3(2.1, -0.35, 0),
+  ]);
+  g2.add(new THREE.Mesh(new THREE.TubeGeometry(B.curve, 60, 0.075, 10, false), glassMat(0xcfeaff, 0.35)));
+  // 澄清石灰水试管
+  const tube2 = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 1.7, 26, 1, true), glassMat(0xcfeaff, 0.2));
+  tube2.position.set(2.1, -0.5, 0); g2.add(tube2);
+  const lime = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 1.0, 26),
+    new THREE.MeshStandardMaterial({ color: CLEAR_WATER.clone(), transparent: true, opacity: 0.22, roughness: 0.25, depthWrite: false }));
+  lime.position.set(2.1, -0.72, 0); g2.add(lime); B.lime = lime;
+  // CO₂ 气泡（瓶内）与导管内气泡
+  B.co2Bub = makeBubbles(g2, 14, 0xff9f43, 0.085, { x:0, sx:0.9, z:0, sz:0.5, y0:-0.85, y1:0.35, amp:0.06 });
+  for (let i = 0; i < 7; i++) {
+    const m = new THREE.Mesh(GEO_SPHERE, new THREE.MeshStandardMaterial({
+      color: 0xff9f43, emissive: 0xff9f43, emissiveIntensity: 0.6,
+      transparent: true, opacity: 0.9, depthWrite: false,
+    }));
+    m.scale.setScalar(0.06); m.visible = false; g2.add(m);
+    B.ductBub.push({ m: m, t: i / 7 });
+  }
+  // 标签
+  addTag('大理石 + 稀盐酸', '', V3(2.9, 2.25, 0), 'B', null, 'hl');
+  addTag('澄清石灰水', '', V3(5.0, 0.65, 0), 'B', null);
+  addTag('CO₂', '', V3(3.55, 1.75, 0), 'B', null, 'product');
+
+  // GLB 扩展口
+  tryLoadGLB(GLB_PATHS.B, 'B', function (obj) { scenes.B.add(obj); }, function () { });
+}
+
+/** 开始电解水 */
+function startElec() {
+  if (B.running === 'acid') resetB();
+  B.running = 'elec'; B.elecT = 0;
+  B.led.emissive = new THREE.Color(0x4fd1c5);
+  capsule('通电中… 负极 H₂，正极 O₂（体积比 2:1）', true);
+  document.getElementById('btnElec').classList.add('on');
+}
+/** 加入稀盐酸 */
+function startAcid() {
+  if (B.running === 'elec') resetB();
+  B.running = 'acid'; B.acidT = 0;
+  B.acidLiq.visible = true;
+  capsule('加入稀盐酸… 观察气泡与石灰水变化', true);
+  document.getElementById('btnAcid').classList.add('on');
+}
+/** 重置实验 */
+function resetB() {
+  B.running = null; B.elecT = 0; B.acidT = 0;
+  B.gasH.scale.y = 0.001; B.gasO.scale.y = 0.001;
+  B.acidLiq.visible = false; B.acidLiq.scale.y = 0.001;
+  B.lime.material.opacity = 0.22; B.lime.material.color.copy(CLEAR_WATER);
+  B.marbles.forEach(function (b) { b.m.scale.setScalar(b.s0); b.m.visible = true; });
+  B.led.emissive = new THREE.Color(0x000000);
+  document.getElementById('btnElec').classList.remove('on');
+  document.getElementById('btnAcid').classList.remove('on');
+  hideCapsule();
+}
+function updateB(dt, t) {
+  const elecOn = B.running === 'elec';
+  const acidOn = B.running === 'acid';
+  updateBubbles(B.hBub, dt, elecOn);
+  updateBubbles(B.oBub, dt, elecOn);
+  updateBubbles(B.co2Bub, dt, acidOn);
+  // 导管内气泡沿曲线移动
+  for (let i = 0; i < B.ductBub.length; i++) {
+    const d = B.ductBub[i];
+    if (!acidOn) { d.m.visible = false; continue; }
+    d.m.visible = true;
+    d.t += dt * 0.28; if (d.t > 1) d.t -= 1;
+    const p = B.curve.getPointAt(Math.min(d.t, 0.999));
+    d.m.position.copy(p);
+  }
+  // 气体柱生长（负极约为正极的 2 倍）
+  if (elecOn) {
+    B.elecT += dt;
+    const k = clamp(B.elecT / 6, 0, 1);
+    B.gasH.scale.y = 0.001 + k * 1.30;
+    B.gasO.scale.y = 0.001 + k * 0.65;
+    if (B.elecT > 6.2 && !B.elecDone) {
+      B.elecDone = true;
+      capsule('电解完成：负极 H₂ 约是正极 O₂ 的 2 倍（正氧负氢）', false, 4000);
+      setTimeout(function () { if (!isDemo()) maybeQuiz('B'); }, 1200);
+    }
+  }
+  if (acidOn) {
+    B.acidT += dt;
+    // 液面上升（前 1.2 秒）
+    const k = clamp(B.acidT / 1.2, 0, 1);
+    B.acidLiq.scale.y = 0.001 + k * 1.05;
+    // 石块逐渐溶解
+    const k2 = clamp((B.acidT - 0.8) / 5, 0, 1);
+    B.marbles.forEach(function (b) { b.m.scale.setScalar(b.s0 * (1 - 0.72 * k2)); });
+    // 4 秒后石灰水变浑浊
+    if (B.acidT > 4) {
+      const k3 = clamp((B.acidT - 4) / 2, 0, 1);
+      B.lime.material.opacity = lerp(0.22, 0.95, k3);
+      B.lime.material.color.copy(CLEAR_WATER).lerp(MILKY, k3);
+      if (!B.turbid) {
+        B.turbid = true;
+        capsule('澄清石灰水变浑浊 → 证明生成了 CO₂', false, 4000);
+        setTimeout(function () { if (!isDemo()) maybeQuiz('B'); }, 1200);
+      }
+    }
+  } else { B.turbid = false; }
+}
+/** 场景 B 面板 */
+function panelB() {
+  document.getElementById('panelBody').innerHTML =
+    '<div class="sec"><h3>实验一 · 电解水</h3>' +
+      '<div class="eq"><div class="main">' + EQ_B.elec.main + '</div>' +
+      '<div class="note">' + EQ_B.elec.note + '</div><div class="tip">' + EQ_B.elec.tip + '</div></div>' +
+      '<p>通直流电后，两个电极上都有气泡产生；负极气泡多、正极气泡少，体积比约为 <b>2 : 1</b>。说明水在通电条件下分解生成了氢气和氧气。</p></div>' +
+    '<div class="sec"><h3>实验二 · 碳酸钙与稀盐酸</h3>' +
+      '<div class="eq"><div class="main">' + EQ_B.acid.main + '</div>' +
+      '<div class="note">' + EQ_B.acid.note + '</div><div class="tip">' + EQ_B.acid.tip + '</div></div>' +
+      '<p>大理石（主要成分 CaCO₃）逐渐溶解，表面产生大量气泡；气体通入澄清石灰水后，石灰水<b>变浑浊</b>，证明生成了二氧化碳。</p></div>' +
+    '<div class="sec"><h3>操作方式</h3><p>点击底部「通电电解」或「加入盐酸」开始演示，「重置实验」可随时回到初始状态。</p></div>';
+}
+
+/* =====================================================================
+   ===== 场景 C：微观世界（分解 / 化合 / 复分解） =====
+   ===================================================================== */
+const C = {
+  group: null, def: null, key: null, t: 0, playing: false, done: false,
+  atoms: [], b1: [], b2: [], lab1: [], lab2: [], fx: [], co2: null,
+};
+const C_HOME = { pos: V3(0, 0.4, 12.5), target: V3(0, -0.2, 0) };
+
+function initSceneC() {
+  C.group = new THREE.Group(); scenes.C.add(C.group);
+  tryLoadGLB(GLB_PATHS.C, 'C', function (obj) { scenes.C.add(obj); }, function () { });
+}
+/** 移除演示内容 */
+function clearC() {
+  while (C.group.children.length) {
+    const o = C.group.children.pop();
+    o.traverse(function (n) { if (n.isMesh && n.material && n.material.dispose) n.material.dispose(); });
+  }
+  C.atoms = []; C.b1 = []; C.b2 = []; C.fx = []; C.co2 = null;
+  C.lab1.concat(C.lab2).forEach(removeTag);
+  C.lab1 = []; C.lab2 = [];
+  C.playing = false; C.done = false; C.t = 0;
+}
+function removeTag(tag) {
+  tag.alive = false;
+  if (tag.el && tag.el.parentNode) tag.el.parentNode.removeChild(tag.el);
+  const i = TAGS.indexOf(tag); if (i >= 0) TAGS.splice(i, 1);
+}
+/** 播放一个微观反应 */
+function playRx(key) {
+  clearC();
+  const def = RX_DEFS[key];
+  if (!def) return;
+  C.def = def; C.key = key; C.t = 0; C.playing = true; C.done = false; C.flashDone = false;
+  // 原子
+  def.atoms.forEach(function (a) {
+    const m = makeAtom(a.el); m.position.set(a.from[0], a.from[1], a.from[2]);
+    C.group.add(m); C.atoms.push(m);
+  });
+  // 起始化学键
+  def.b1.forEach(function (b) {
+    C.group.add(makeBond(V3(def.atoms[b[0]].from[0], def.atoms[b[0]].from[1], def.atoms[b[0]].from[2]),
+                          V3(def.atoms[b[1]].from[0], def.atoms[b[1]].from[1], def.atoms[b[1]].from[2]), b[2]));
+    C.b1.push(C.group.children[C.group.children.length - 1]);
+  });
+  // 产物化学键（先隐藏）
+  def.b2.forEach(function (b) {
+    const g = makeBond(V3(def.atoms[b[0]].to[0], def.atoms[b[0]].to[1], def.atoms[b[0]].to[2]),
+                        V3(def.atoms[b[1]].to[0], def.atoms[b[1]].to[1], def.atoms[b[1]].to[2]), b[2]);
+    g.userData.bondMat.opacity = 0; g.visible = false;
+    C.group.add(g); C.b2.push(g);
+  });
+  // 标签
+  def.lab1.forEach(function (l) { C.lab1.push(addTag(l.t, '', V3(l.p[0], l.p[1], l.p[2]), 'C', null)); });
+  def.lab2.forEach(function (l) {
+    const tag = addTag(l.t, '', V3(l.p[0], l.p[1], l.p[2]), 'C', null, 'product');
+    tag.alive = false; tag.el.style.display = 'none'; C.lab2.push(tag);
+  });
+  capsule(def.title + '　' + def.eq, true);
+}
+/** 闪光特效 */
+function addFlash(color) {
+  const light = new THREE.PointLight(new THREE.Color(color), 0, 24);
+  C.group.add(light);
+  const ball = new THREE.Mesh(GEO_SPHERE, new THREE.MeshBasicMaterial({
+    color: color, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  ball.scale.setScalar(0.3); C.group.add(ball);
+  C.fx.push({ light: light, ball: ball, t: 0, max: 0.75 });
+}
+/** CO₂ 产物：独立 group 上浮 + 气泡光晕 */
+function spawnCO2(pos) {
+  const g = new THREE.Group(); g.position.copy(pos);
+  const c = makeAtom('C'); c.position.set(0, 0, 0); g.add(c);
+  const o1 = makeAtom('O'); o1.position.set(-0.62, 0, 0); g.add(o1);
+  const o2 = makeAtom('O'); o2.position.set(0.62, 0, 0); g.add(o2);
+  g.add(makeBond(V3(0, 0, 0), V3(-0.62, 0, 0), 2));
+  g.add(makeBond(V3(0, 0, 0), V3(0.62, 0, 0), 2));
+  const halo = new THREE.Mesh(GEO_SPHERE, new THREE.MeshBasicMaterial({
+    color: 0xff9f43, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending, depthWrite: false,
+  }));
+  halo.scale.setScalar(1.5); g.add(halo);
+  C.group.add(g);
+  C.co2 = { g: g, t: 0, halo: halo, x0: pos.x, y0: pos.y };
+}
+const _p1 = new THREE.Vector3(), _p2 = new THREE.Vector3(), _cp = new THREE.Vector3();
+function updateC(dt, t) {
+  // 特效
+  for (let i = C.fx.length - 1; i >= 0; i--) {
+    const f = C.fx[i]; f.t += dt;
+    const k = clamp(f.t / f.max, 0, 1);
+    f.light.intensity = 14 * (1 - k);
+    f.ball.scale.setScalar(0.3 + k * 3.4);
+    f.ball.material.opacity = 0.85 * (1 - k);
+    if (k >= 1) {
+      C.group.remove(f.light); C.group.remove(f.ball);
+      f.ball.material.dispose(); C.fx.splice(i, 1);
+    }
+  }
+  // CO₂ 上浮
+  if (C.co2) {
+    C.co2.t += dt;
+    C.co2.g.position.y += dt * 0.5;
+    C.co2.g.rotation.y += dt * 0.8;
+    C.co2.halo.material.opacity = 0.18 + 0.1 * Math.sin(C.co2.t * 4);
+    C.co2.g.position.x = C.co2.x0 + 0.12 * Math.sin(C.co2.t * 1.6);
+    if (C.co2.t > 6) { C.co2.g.visible = false; }
+  }
+  if (!C.playing) return;
+  const def = C.def;
+  C.t += dt;
+  const T = C.t;
+
+  if (T < 0.9) {
+    /* ---- 阶段1：化学键断裂闪烁 ---- */
+    const k = Math.sin(T * 24) * 0.5 + 0.5;
+    C.b1.forEach(function (g) {
+      g.userData.bondMat.emissiveIntensity = 0.5 + k * 2.4;
+      g.userData.bondMat.opacity = 0.5 + k * 0.5;
+    });
+    C.atoms.forEach(function (m, i) {
+      _p1.set(def.atoms[i].from[0], def.atoms[i].from[1], def.atoms[i].from[2]);
+      m.position.copy(_p1);
+      m.position.x += Math.sin(T * 32 + i) * 0.04;
+      m.position.y += Math.cos(T * 28 + i * 1.7) * 0.03;
+    });
+    if (!C.flashDone && T > 0.55) { C.flashDone = true; addFlash(def.flash || '#4fd1c5'); }
+  } else if (T < 2.35) {
+    /* ---- 阶段2：原子飞行到新位置 ---- */
+    C.b1.forEach(function (g) { g.visible = false; });
+    const u = easeInOut((T - 0.9) / 1.45);
+    C.atoms.forEach(function (m, i) {
+      _p1.set(def.atoms[i].from[0], def.atoms[i].from[1], def.atoms[i].from[2]);
+      _p2.set(def.atoms[i].to[0], def.atoms[i].to[1], def.atoms[i].to[2]);
+      _cp.addVectors(_p1, _p2).multiplyScalar(0.5); _cp.y += 1.1 + (i % 3) * 0.15;
+      // 二次贝塞尔
+      const iu = 1 - u;
+      m.position.set(
+        iu * iu * _p1.x + 2 * iu * u * _cp.x + u * u * _p2.x,
+        iu * iu * _p1.y + 2 * iu * u * _cp.y + u * u * _p2.y,
+        iu * iu * _p1.z + 2 * iu * u * _cp.z + u * u * _p2.z
+      );
+    });
+  } else if (T < 3.05) {
+    /* ---- 阶段3：新键渐入 ---- */
+    C.atoms.forEach(function (m, i) { m.position.set(def.atoms[i].to[0], def.atoms[i].to[1], def.atoms[i].to[2]); });
+    const u = clamp((T - 2.35) / 0.7, 0, 1);
+    C.b2.forEach(function (g) { g.visible = true; g.userData.bondMat.opacity = u; });
+  } else {
+    /* ---- 阶段4：产物标签弹出 ---- */
+    C.atoms.forEach(function (m, i) { m.position.set(def.atoms[i].to[0], def.atoms[i].to[1], def.atoms[i].to[2]); });
+    C.b2.forEach(function (g) { g.userData.bondMat.opacity = 1; });
+    if (!C.done) {
+      C.done = true; C.playing = false; C.flashDone = false;
+      C.lab1.forEach(removeTag); C.lab1 = [];
+      C.lab2.forEach(function (tag) { tag.alive = true; tag.el.style.display = 'block'; });
+      addFlash(def.flash || '#4fd1c5');
+      // CO₂ 产物：隐藏原原子，改用可上浮的独立分子（带气泡光晕）
+      if (def.floatProduct !== undefined && def.lab2[def.floatProduct]) {
+        (def.floatAtoms || []).forEach(function (i) { if (C.atoms[i]) C.atoms[i].visible = false; });
+        const lp = def.lab2[def.floatProduct].p;
+        spawnCO2(V3(lp[0], lp[1] + 0.7, lp[2]));
+      }
+      capsule(def.title + ' 完成：' + def.eq, false, 5000);
+      setTimeout(function () { if (!isDemo()) maybeQuiz('C'); }, 1400);
+    }
+  }
+}
+/** 场景 C 面板 */
+function panelC() {
+  document.getElementById('panelBody').innerHTML =
+    '<div class="sec"><h3>分解反应</h3><div class="rtype"><div class="h">A → B + C（一变多）</div>' +
+      '<div class="b">一种物质生成两种或两种以上其他物质。例：2H₂O —通电→ 2H₂↑ + O₂↑</div></div></div>' +
+    '<div class="sec"><h3>化合反应</h3><div class="rtype"><div class="h">A + B → C（多变一）</div>' +
+      '<div class="b">两种或两种以上物质生成一种物质。例：2H₂ + O₂ —点燃→ 2H₂O</div></div></div>' +
+    '<div class="sec"><h3>复分解反应</h3><div class="rtype"><div class="h">AB + CD → AD + CB（交换成分）</div>' +
+      '<div class="b">两种化合物互相交换成分，生成另外两种化合物。例：CaCO₃ + 2HCl → CaCl₂ + H₂O + CO₂↑</div></div></div>' +
+    '<div class="sec"><h3>动画流程</h3><p>化学键断裂闪烁 → 原子飞行重排 → 新键形成 → 产物标签弹出。<b>原子种类、个数、质量在反应前后都不变。</b></p></div>' +
+    '<div class="sec"><h3>操作方式</h3><p>点击底部三个按钮分别播放；每次播放会自动清空上一次的演示。</p></div>';
+}
+
+/* =====================================================================
+   ===== 随堂选择题闯关 + 解锁机制 =====
+   ===================================================================== */
+const PROG = { A: [false, false], B: [false, false], C: [false, false] };
+const UNLOCKED = { A: true, B: false, C: false };
+const SCENE_NAME = { A: '分子结构', B: '反应实验', C: '微观世界' };
+let quizIdx = -1, quizLocked = false;
+
+const qMask = document.getElementById('quizMask');
+const qNo = document.getElementById('qNo');
+const qTitle = document.getElementById('qTitle');
+const qOpts = document.getElementById('qOpts');
+const qFb = document.getElementById('qFb');
+const qFoot = document.getElementById('qFoot');
+
+function quizOfScene(sc) {
+  const ids = [];
+  QUIZ.forEach(function (q, i) { if (q.scene === sc) ids.push(i); });
+  return ids;
+}
+function sceneDone(sc) { return PROG[sc].every(Boolean); }
+function totalDone() { return ['A', 'B', 'C'].reduce(function (n, k) { return n + PROG[k].filter(Boolean).length; }, 0); }
+function updateProgress() {
+  const n = totalDone();
+  document.getElementById('progText').textContent = n + '/6';
+  document.getElementById('progBar').style.width = (n / 6 * 100) + '%';
+}
+/** 场景讲解完毕后自动弹题（该场景未做完时） */
+function maybeQuiz(sc) {
+  if (isDemo()) return;
+  if (sceneDone(sc)) return;
+  setTimeout(function () { if (!isDemo() && !qMask.classList.contains('show')) openQuiz(sc); }, 500);
+}
+function openQuiz(sc) {
+  const ids = quizOfScene(sc);
+  let found = -1;
+  for (let i = 0; i < ids.length; i++) { if (!PROG[sc][i]) { found = ids[i]; break; } }
+  if (found < 0) return;         // 本场景题目已全部答对
+  quizIdx = found;
+  quizLocked = true;
+  renderQuiz();
+  qMask.classList.add('show');
+}
+function renderQuiz() {
+  const q = QUIZ[quizIdx];
+  const scIdx = quizOfScene(q.scene).indexOf(quizIdx);
+  qNo.textContent = '场景 ' + q.scene + ' · 第 ' + (scIdx + 1) + ' 题 / 本场景 2 题（总进度 ' + totalDone() + '/6）';
+  qTitle.textContent = q.q;
+  qOpts.innerHTML = '';
+  qFb.className = 'feedback';
+  qFoot.innerHTML = '';
+  q.opts.forEach(function (txt, i) {
+    const d = document.createElement('div');
+    d.className = 'opt';
+    d.innerHTML = '<span class="k">' + 'ABCD'[i] + '</span><span>' + txt + '</span>';
+    d.addEventListener('click', function () { answer(i, d); });
+    qOpts.appendChild(d);
+  });
+}
+function answer(i, el) {
+  const q = QUIZ[quizIdx];
+  const nodes = qOpts.querySelectorAll('.opt');
+  nodes.forEach(function (n) { n.classList.add('done'); });
+  if (i === q.ans) {
+    el.classList.add('right');
+    qFb.className = 'feedback ok';
+    qFb.querySelector('.lab').textContent = '✅ 回答正确！';
+    qFb.querySelector('.txt').textContent = q.why;
+    PROG[q.scene][quizOfScene(q.scene).indexOf(quizIdx)] = true;
+    updateProgress();
+    // 判断解锁
+    let unlocked = null;
+    if (q.scene === 'A' && sceneDone('A') && !UNLOCKED.B) { UNLOCKED.B = true; unlocked = 'B'; }
+    if (q.scene === 'B' && sceneDone('B') && !UNLOCKED.C) { UNLOCKED.C = true; unlocked = 'C'; }
+    if (unlocked) unlockTab(unlocked);
+    // 底部按钮
+    qFoot.innerHTML = '';
+    const remain = quizOfScene(q.scene).some(function (id) { return !PROG[q.scene][quizOfScene(q.scene).indexOf(id)]; });
+    if (remain) {
+      const b1 = document.createElement('button'); b1.className = 'btn primary'; b1.textContent = '下一题 →';
+      b1.onclick = function () { quizIdx = -1; openQuiz(q.scene); };
+      qFoot.appendChild(b1);
+    } else {
+      if (totalDone() >= 6) {
+        const b1 = document.createElement('button'); b1.className = 'btn primary'; b1.textContent = '🎓 查看通关证书';
+        b1.onclick = function () { closeQuiz(); showFinish(); };
+        qFoot.appendChild(b1);
+      } else {
+        const b1 = document.createElement('button'); b1.className = 'btn primary';
+        b1.textContent = '进入场景 ' + nextScene(q.scene) + ' →';
+        b1.onclick = function () { closeQuiz(); goScene(nextScene(q.scene)); };
+        qFoot.appendChild(b1);
+      }
+    }
+  } else {
+    el.classList.add('wrong');
+    qFb.className = 'feedback no';
+    qFb.querySelector('.lab').textContent = '❌ 再想想～';
+    qFb.querySelector('.txt').textContent = q.why;
+    qFoot.innerHTML = '';
+    const b1 = document.createElement('button'); b1.className = 'btn warn'; b1.textContent = '🔁 重答本题';
+    b1.onclick = function () { quizIdx = -1; openQuiz(q.scene); };
+    qFoot.appendChild(b1);
+  }
+}
+function nextScene(sc) { return sc === 'A' ? 'B' : (sc === 'B' ? 'C' : 'C'); }
+function unlockTab(k) {
+  const tab = document.querySelector('.tab[data-scene="' + k + '"]');
+  if (!tab) return;
+  tab.classList.remove('locked');
+  tab.textContent = k + ' ' + SCENE_NAME[k];
+  capsule('🎉 已解锁场景 ' + k + '：' + SCENE_NAME[k], false, 3000);
+}
+function closeQuiz() { qMask.classList.remove('show'); quizIdx = -1; quizLocked = false; }
+/** 通关面板 */
+function showFinish() {
+  quizIdx = -1; quizLocked = true;
+  closeQuiz();
+  document.getElementById('finishMask').classList.add('show');
+}
+document.getElementById('qClose').addEventListener('click', closeQuiz);
+qMask.addEventListener('click', function (e) { if (e.target === qMask) closeQuiz(); });
+
+/* =====================================================================
+   ===== 场景切换 =====
+   ===================================================================== */
+const HOME = { A: A_HOME, B: B_HOME, C: C_HOME };
+function goScene(key, force) {
+  if (!force && !UNLOCKED[key]) {
+    capsule('🔒 场景 ' + key + ' 尚未解锁，请先完成上一场景的随堂练习', true, 2600);
+    return;
+  }
+  currentScene = key;
+  document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t.dataset.scene === key); });
+  document.querySelectorAll('.toolgroup').forEach(function (g) { g.classList.toggle('active', g.dataset.scene === key); });
+  const H = HOME[key];
+  flyTo(H.pos, H.target, 0.5);
+  document.getElementById('panelTitle').textContent = '场景 ' + key + ' · ' + SCENE_NAME[key];
+  if (key === 'A') panelA();
+  if (key === 'B') panelB();
+  if (key === 'C') panelC();
+  hideCapsule();
+}
+document.querySelectorAll('.tab').forEach(function (t) {
+  t.addEventListener('click', function () { goScene(t.dataset.scene, false); });
+});
+
+/* =====================================================================
+   ===== 演示模式（约 25 秒时间轴，force 绕过解锁） =====
+   ===================================================================== */
+const demo = { on: false, timers: [] };
+function isDemo() { return demo.on; }
+function showSummary() {
+  const el = document.getElementById('summary');
+  el.classList.add('show');
+}
+function startDemo() {
+  if (demo.on) return;
+  demo.on = true;
+  closeQuiz();
+  document.body.classList.add('demo-mode');
+  const T = [];
+  function at(ms, fn) { T.push(setTimeout(fn, ms)); }
+  at(0, function () { goScene('A', true); });
+  at(300, function () { startTour(); });                 // 0–8s 分子巡览
+  at(8000, function () { stopTour(); goScene('B', true); });
+  at(8300, function () { startElec(); });                // 8–12s 电解水
+  at(12000, function () { startAcid(); });               // 12–16s 大理石+盐酸（4s 后变浑浊）
+  at(16000, function () { goScene('C', true); });
+  at(16300, function () { playRx('decomp'); });          // 16–20s 分解反应
+  at(20000, function () { playRx('dbl'); });             // 20–23s 复分解反应
+  at(23000, function () { showSummary(); });             // 23–25s 总结语
+  at(25000, function () { exitDemo(); });
+  demo.timers = T;
+  window.addEventListener('click', exitDemo, { once: true });
+}
+function exitDemo() {
+  if (!demo.on) return;
+  demo.on = false;
+  demo.timers.forEach(clearTimeout); demo.timers = [];
+  window.removeEventListener('click', exitDemo);
+  document.body.classList.remove('demo-mode');
+  document.getElementById('summary').classList.remove('show');
+  // 还原状态
+  stopTour(); resetB(); clearC();
+  goScene('A', true);
+  panelA();
+}
+document.getElementById('btnDemo').addEventListener('click', function (e) {
+  e.stopPropagation();
+  startDemo();
+});
+
+/* =====================================================================
+   ===== 按钮与事件绑定 =====
+   ===================================================================== */
+document.getElementById('btnTour').addEventListener('click', function () {
+  if (A.tourOn) { stopTour(); panelA(); } else { startTour(); }
+});
+document.getElementById('btnSpin').addEventListener('click', function () {
+  controls.autoRotate = !controls.autoRotate;
+  this.classList.toggle('on', controls.autoRotate);
+  this.textContent = controls.autoRotate ? '⏸ 停止旋转' : '🔄 自动旋转';
+});
+document.getElementById('btnResetA').addEventListener('click', function () {
+  flyTo(A_HOME.pos, A_HOME.target, 0.5); capsule('视角已复位', false, 1200);
+});
+document.getElementById('btnElec').addEventListener('click', function () {
+  if (B.running === 'elec') { resetB(); } else { startElec(); }
+});
+document.getElementById('btnAcid').addEventListener('click', function () {
+  if (B.running === 'acid') { resetB(); } else { startAcid(); }
+});
+document.getElementById('btnResetB').addEventListener('click', resetB);
+document.getElementById('btnDecomp').addEventListener('click', function () { playRx('decomp'); });
+document.getElementById('btnComb').addEventListener('click', function () { playRx('comb'); });
+document.getElementById('btnDouble').addEventListener('click', function () { playRx('dbl'); });
+document.getElementById('btnResetC').addEventListener('click', function () { clearC(); hideCapsule(); capsule('已清空，可重新选择反应类型', false, 1600); });
+document.getElementById('btnQuiz').addEventListener('click', function () { openQuiz(currentScene); });
+
+// 双击复位（切到当前场景初始视角）
+renderer.domElement.addEventListener('dblclick', function () {
+  const H = HOME[currentScene];
+  flyTo(H.pos, H.target, 0.5);
+  capsule('视角已复位', false, 1200);
+});
+
+/* ---- 窗口尺寸 ---- */
+function resize() {
+  const w = viewport.clientWidth, h = viewport.clientHeight;
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+}
+window.addEventListener('resize', resize);
+
+/* =====================================================================
+   ===== 8. 启动 =====
+   ===================================================================== */
+initSceneA(); initSceneB(); initSceneC();
+updateProgress();
+resize();
+
+/* ---- URL 调试参数：?scene=B&force=1 / ?demo=1 / ?tour=1 / ?elec=1 / ?acid=1 / ?rx=decomp / ?quiz=A ---- */
+(function () {
+  const q = new URLSearchParams(location.search);
+  const sc = (q.get('scene') || 'A').toUpperCase();
+  if (sc !== 'A') { UNLOCKED.B = true; UNLOCKED.C = true; unlockTab('B'); unlockTab('C'); }
+  goScene(sc, true);
+  if (q.get('tour')) startTour();
+  if (q.get('elec')) setTimeout(startElec, 400);
+  if (q.get('acid')) setTimeout(startAcid, 400);
+  if (q.get('rx')) setTimeout(function () { playRx(q.get('rx')); }, 500);
+  if (q.get('quiz')) setTimeout(function () { openQuiz(q.get('quiz').toUpperCase()); }, 600);
+  if (q.get('demo')) setTimeout(startDemo, 500);
+})();
+
+/* ---- 主循环 ---- */
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t = clock.elapsedTime;
+  updateCamTween(dt);
+  controls.update();
+  if (currentScene === 'A') updateA(dt, t);
+  if (currentScene === 'B') updateB(dt, t);
+  if (currentScene === 'C') updateC(dt, t);
+  renderer.render(scenes[currentScene], camera);
+  updateTags();
+}
+animate();
+
+console.log('%c[化学课件] 初始化完成，three.js r' + THREE.REVISION, 'color:#4fd1c5');
+
+};
+</script>
+</body>
+</html>
