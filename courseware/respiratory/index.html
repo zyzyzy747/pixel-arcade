@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="SbpGuHTRP9joEgiz62Bx8w">
+<head data-page-node-id="SeJpuu5CBOudV9EFYEAAVq">
+<meta charset="UTF-8" data-page-node-id="uWZS37Nd6Gzj3I252wCeMC">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="0ByI5uJcuxvCxZGt7kPZ37">
+<title>呼吸系统与肺泡气体交换 · 3D 互动课件</title>
+<link rel="stylesheet" href="./style.css" data-page-node-id="J168L7zHmbwhriFKDM1yPO">
+</head>
+<body data-page-node-id="fJcpiDnoPCfTdy671vYATG">
+
+<!-- ============================================================
+     顶部：课件标题 + 3 个场景 Tab + 演示模式入口
+     ============================================================ -->
+<header id="topbar" data-page-node-id="JwqnKloOqzZGFoxi4FMw6I">
+  <div class="brand" data-page-node-id="t7uhYXCjCBEBgQFDfzGil6">
+    <div class="brand-mark" data-page-node-id="aijS2JYSbLrVLHOGSCzvtJ">肺</div>
+    <div class="brand-text" data-page-node-id="Aid9SMXlM6hvAlwT6YKF10">
+      <h1 data-page-node-id="yk9t5t1aj4505zZ4nbcbGX">呼吸系统与肺泡气体交换 · 3D 互动课件</h1>
+      <p data-page-node-id="wFsigozddaVe2DyRFW86GN">初中 / 高中生物 · 课堂演示 · 可录制短视频</p>
+    </div>
+  </div>
+
+  <nav id="tabs" class="tabs" data-page-node-id="bLtGeP6hjGffWKOkKenpz9">
+    <button class="tab is-active" data-scene="A" data-page-node-id="RzcvBIUgPmdG8xvul9cxob"><i data-page-node-id="ABuGME68uz9OxPZiaxEuOg">①</i>呼吸系统结构</button>
+    <button class="tab" data-scene="B" data-page-node-id="stnYW46QolhAo9rcIi3KDn"><i data-page-node-id="lZtTEjX5JZAgxXrPTqQKWv">②</i>呼吸运动</button>
+    <button class="tab" data-scene="C" data-page-node-id="jn5kzbLdyVCRuCdmMGpenF"><i data-page-node-id="kXlKAWSpJMVCB32dcl0gRN">③</i>肺泡气体交换</button>
+  </nav>
+
+  <div class="top-actions" data-page-node-id="FshKic6JVbwYjklQ2IE5oR">
+    <button id="btnDemo" class="btn btn-demo" data-page-node-id="SK7zwrbHtePw7FDs47RRlf">演示模式</button>
+  </div>
+</header>
+
+<!-- ============================================================
+     中部：3D 舞台（左） + 知识面板（右）
+     ============================================================ -->
+<main id="stage" data-page-node-id="F3MEM9pOvJtjebneJzbrEo">
+  <section id="canvasWrap" data-page-node-id="42vAYLcDXszC2AbrXohU2z">
+    <div id="sceneTag" class="scene-tag" data-page-node-id="xIEN4JjOk1jt64W2l17nSl">场景 A · 呼吸系统结构</div>
+    <div id="statusBig" class="status-big" data-page-node-id="f6xk9OFsgObFLu4CbwsbGw"></div>
+
+    <!-- 场景 C 的 O₂ / CO₂ 常显图例 -->
+    <div id="legendGas" class="legend-gas" hidden data-page-node-id="0IPtMX53FsbMskSrXDFjbD">
+      <div class="lg-item" data-page-node-id="r7E796wOxL34jF1Sx5VjEN"><i class="dot dot-o2" data-page-node-id="HjhwlH2W3CwwdOwE861Gnf"></i><b data-page-node-id="tqABHb9llpNvJlf9AJwEwy">O₂</b> 肺泡 → 血液</div>
+      <div class="lg-item" data-page-node-id="j8gJERPxRXzAKTpPDTZEqX"><i class="dot dot-co2" data-page-node-id="14Me4m92J9kC17SoU204nh"></i><b data-page-node-id="vLJSxfjJXTOXxLxFlilOTE">CO₂</b> 血液 → 肺泡</div>
+    </div>
+
+    <div class="hint-bar" data-page-node-id="SA7qewymYTsHFT1sUdfjmF">左键拖拽旋转 · 滚轮缩放 · 双击复位视角 · 点击标签看知识卡</div>
+  </section>
+
+  <aside id="panel" class="panel" data-page-node-id="atsOgijxdVsyIEpBaqlVvN">
+    <h2 id="panelTitle" data-page-node-id="VfUrXgLm6KCEtGpA22YJdV">呼吸系统整体结构</h2>
+    <div id="panelBody" class="panel-body" data-page-node-id="uzxMYe6zH1UzpAzxz4Rp1F"></div>
+    <div id="panelTip" class="panel-tip" data-page-node-id="ZpULN3ECQ8smhGukdsMl4I"></div>
+  </aside>
+</main>
+
+<!-- ============================================================
+     底部：各场景功能按钮条 + 随堂练习进度
+     ============================================================ -->
+<footer id="bottombar" data-page-node-id="tgXWeHqdRKGWbchjXW0aWY">
+  <!-- ===== 场景A 工具条 ===== -->
+  <div class="tools" id="toolsA" data-page-node-id="cSeJXOKesbRIlA2YMAeEvL">
+    <button class="btn primary" id="btnAirflow" data-page-node-id="WYdyyzhoxCX2dp0hgwgEcO">空气路径演示</button>
+    <button class="btn" id="btnQuizA" data-page-node-id="xPz76ztwSsHCISg5t8feMV">随堂练习</button>
+    <button class="btn ghost" id="btnResetA" data-page-node-id="3MlcLcg1rAuuV5XLAfCrDt">复位视角</button>
+  </div>
+
+  <!-- ===== 场景B 工具条 ===== -->
+  <div class="tools" id="toolsB" hidden data-page-node-id="zKgBHlFzuWPazigmD9wWUl">
+    <button class="btn primary" id="btnInhale" data-page-node-id="F3O4nALfT0aF4bkuOi0obr">吸气</button>
+    <button class="btn primary" id="btnExhale" data-page-node-id="CGEnFHnUdetacAVcY2FboO">呼气</button>
+    <button class="btn" id="btnAuto" data-page-node-id="zDInQwN0InkXcbnZQoLsFU">自动循环</button>
+    <button class="btn" id="btnQuizB" data-page-node-id="OoTOPmw0ovvDXKD3jKC1na">随堂练习</button>
+    <button class="btn ghost" id="btnResetB" data-page-node-id="H5NIhRgVf9fBkNOHCgFpRj">复位视角</button>
+  </div>
+
+  <!-- ===== 场景C 工具条 ===== -->
+  <div class="tools" id="toolsC" hidden data-page-node-id="d3rGk2LjERONd7gfBhcU5g">
+    <button class="btn primary" id="btnGas" data-page-node-id="0VLbQCcqdSIw1Laudxx0fG">气体交换演示</button>
+    <button class="btn" id="btnQuizC" data-page-node-id="jXDdNJF1VAyIGf0fJxavWB">随堂练习</button>
+    <button class="btn ghost" id="btnResetC" data-page-node-id="h6xhAa3r2Nkmc73DqnSpHW">复位视角</button>
+  </div>
+
+  <div class="quiz-progress" id="quizProgress" data-page-node-id="BMHT4AsIZstvzqpGVy1VNr">随堂练习进度 0 / 6</div>
+</footer>
+
+<!-- ============================================================
+     演示模式：遮罩 + 结尾总结语
+     ============================================================ -->
+<div id="demoOverlay" class="demo-overlay" hidden data-page-node-id="Hw4GYGfdSaDBY3ymg3Z3mP">
+  <div class="demo-hint" data-page-node-id="NJdvGiWHmDlBDhEm7fiOWX">演示中… 点击任意处退出</div>
+</div>
+<div id="demoEnd" class="demo-end" hidden data-page-node-id="E2eHuMUQ2HPOkbwkyInyAt">
+  <p data-page-node-id="W8ZY2155TXjU9c7lbXx19M">把抽象知识点，变成能看、能点、能提问的互动模型。</p>
+</div>
+
+<!-- ============================================================
+     随堂选择题弹窗
+     ============================================================ -->
+<div id="quizModal" class="modal" hidden data-page-node-id="dazxkmVMjg5fP9rbH1mPun">
+  <div class="modal-card quiz-card" data-page-node-id="GEK25jnEY7RlgnatijtFHC">
+    <div class="quiz-head" data-page-node-id="uFDY3ihQFUqxyNCQUllTya">
+      <span id="quizTag" class="quiz-tag" data-page-node-id="K0E59oLdHvY5GPd8OEVZbQ">场景 A</span>
+      <span id="quizCount" class="quiz-count" data-page-node-id="AD0N0GtEdvaPhR5pWgrmfs">第 1 / 6 题</span>
+    </div>
+    <h3 id="quizQuestion" data-page-node-id="TCmrUeXif0bkA3nBStHLAq">题目</h3>
+    <div id="quizOptions" class="quiz-options" data-page-node-id="speEZrWc1HulQ5weYolwR8"></div>
+    <div id="quizFeedback" class="quiz-feedback" data-page-node-id="JzlCxM8nJXDhedcZfaBbGi"></div>
+    <div class="quiz-foot" data-page-node-id="mOnrGGUcuYxUs7B3I2Tmgr">
+      <button id="btnQuizClose" class="btn ghost" data-page-node-id="GIfHqWrCYlj3ykWwQXf0tz">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     全部答完的完成面板
+     ============================================================ -->
+<div id="finishModal" class="modal" hidden data-page-node-id="W199USawPYhejmUJyH3bgq">
+  <div class="modal-card finish-card" data-page-node-id="DtWrQEY03kQSSpyDT8B35S">
+    <div class="finish-mark" data-page-node-id="LQEirQRuWgDHaMkhSEbUBV">6 / 6</div>
+    <h3 data-page-node-id="S5QOnYiYG5DWBw9TjtRKdM">随堂练习全部完成</h3>
+    <p id="finishText" data-page-node-id="F7JTItISFRmpkviHetpNJr">三个知识点的核心问题你已经全部答对，可以继续探索模型，或进入演示模式录制小结。</p>
+    <div class="quiz-foot" data-page-node-id="rRpxyfXGoCDAFmOWHB7Acx">
+      <button id="btnFinishClose" class="btn primary" data-page-node-id="fs6OoQTmhC9g71IpV7rsb7">继续学习</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     启动失败兜底提示
+     ============================================================ -->
+<div id="bootError" class="boot-error" hidden data-page-node-id="niPehLAhojKYvi7EIB3GwV">
+  <h2 data-page-node-id="wRLz1kXzQWV7UAG2QXbEjo">课件启动失败</h2>
+  <p id="bootErrorMsg" data-page-node-id="rtUG5V2EAiF0AGuyifAT4K"></p>
+  <p class="muted" data-page-node-id="TVJjDPotGDp1OYlMyXIJNM">建议：双击运行「启动本地服务器.bat」后访问 http://localhost:8000 ，或更换 Chrome / Edge 浏览器。</p>
+</div>
+
+<script>
+/* ============================================================
+ * 依赖引导区（关键）
+ * ------------------------------------------------------------
+ * 1) http(s) 环境  → ES Module + importmap，优先本地 libs/，缺失回退 CDN
+ * 2) file:// 环境  → 浏览器会以 CORS 拦截 ES Module，改用本地打包的
+ *                    libs/three.bundle.js（由 tools/build-umd.mjs 生成）
+ * 两条路径最终都把 three 挂到 window.THREE，再加载同一份 main.js。
+ * ============================================================ */
+(function () {
+  var isFile = location.protocol === 'file:';
+  var CDN_LIST = [
+    'https://unpkg.com/three@0.160.1/',
+    'https://cdn.jsdelivr.net/npm/three@0.160.1/'
+  ];
+
+  function showBootError(msg) {
+    var box = document.getElementById('bootError');
+    document.getElementById('bootErrorMsg').textContent = msg;
+    box.hidden = false;
+    console.error('[课件] ' + msg);
+  }
+
+  /** 加载经典脚本 */
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.async = false;
+      s.onload = function () { resolve(s); };
+      s.onerror = function () { reject(new Error('无法加载 ' + src)); };
+      document.head.appendChild(s);
+    });
+  }
+
+  /** 处理 ?scene=B&demo=1&quiz=A&air=1 等调试 / 深链接参数 */
+  function applyUrlParams() {
+    var p = new URLSearchParams(location.search);
+    var click = function (sel) {
+      var el = document.querySelector(sel);
+      if (el) el.click();
+    };
+    if (p.has('scene')) click('.tab[data-scene="' + p.get('scene') + '"]');
+    if (p.has('quiz')) setTimeout(function () { click('#btnQuiz' + p.get('quiz')); }, 300);
+    if (p.has('air')) setTimeout(function () { click('#btnAirflow'); }, 400);
+    if (p.has('inhale')) setTimeout(function () { click('#btnInhale'); }, 300);
+    if (p.has('auto')) setTimeout(function () { click('#btnAuto'); }, 300);
+    if (p.has('gas')) setTimeout(function () { click('#btnGas'); }, 300);
+    if (p.has('demo')) setTimeout(function () { click('#btnDemo'); }, 300);
+  }
+  window.addEventListener('app-ready', applyUrlParams, { once: true });
+
+  /** three 就绪后加载业务代码 */
+  function startApp() {
+    var s = document.createElement('script');
+    s.src = './main.js';
+    s.onerror = function () { showBootError('找不到 main.js，请确认文件完整。'); };
+    document.body.appendChild(s);
+  }
+
+  /** 用 importmap + ES Module 加载 three（支持 base 切换以便回退 CDN） */
+  function bootEsm(base, addonsBase, label) {
+    return new Promise(function (resolve, reject) {
+      var im = document.createElement('script');
+      im.type = 'importmap';
+      im.textContent = JSON.stringify({
+        imports: { 'three': base + 'three.module.js', 'three/addons/': addonsBase }
+      });
+      document.head.appendChild(im);
+
+      var m = document.createElement('script');
+      m.type = 'module';
+      m.textContent = [
+        "import * as T from 'three';",
+        "import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';",
+        "import { OrbitControls } from 'three/addons/controls/OrbitControls.js';",
+        "import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';",
+        "window.THREE = Object.assign({}, T, { GLTFLoader: GLTFLoader, OrbitControls: OrbitControls, CSS2DRenderer: CSS2DRenderer, CSS2DObject: CSS2DObject });",
+        "console.log('%c[课件] 已通过 ES Module + importmap 加载 three.js r' + T.REVISION + '（" + label + "）', 'color:#4fd1c5');",
+        "window.dispatchEvent(new CustomEvent('three-ready'));"
+      ].join('\n');
+      m.onerror = function () { reject(new Error(label + ' 加载失败')); };
+      document.head.appendChild(m);
+      window.addEventListener('three-ready', function () { resolve(); }, { once: true });
+      setTimeout(function () { reject(new Error(label + ' 超时')); }, 12000);
+    });
+  }
+
+  if (isFile) {
+    /* ---------- 双击打开：本地打包版优先，其次 CDN ---------- */
+    loadScript('./libs/three.bundle.js').then(function () {
+      if (!window.THREE) throw new Error('three.bundle.js 未导出 THREE');
+      console.log('%c[课件] file:// 协议：已使用本地打包版 three.js r' + window.THREE.REVISION, 'color:#4fd1c5');
+      window.dispatchEvent(new CustomEvent('three-ready'));
+    }).catch(function () {
+      console.warn('[课件] 本地打包版缺失，尝试 CDN 回退…');
+      return bootEsm(CDN_LIST[0], CDN_LIST[0] + 'examples/jsm/', 'CDN unpkg');
+    }).catch(function () {
+      return bootEsm(CDN_LIST[1], CDN_LIST[1] + 'examples/jsm/', 'CDN jsdelivr');
+    }).then(startApp).catch(function (e) {
+      showBootError(e.message + '。请确认 libs/ 目录完整，或改用本地服务器打开。');
+    });
+  } else {
+    /* ---------- 本地服务器打开：本地 ES Module 优先，缺失回退 CDN ---------- */
+    fetch('./libs/three.module.js', { method: 'HEAD' })
+      .then(function (r) { return r.ok; })
+      .catch(function () { return false; })
+      .then(function (localOk) {
+        if (localOk) {
+          console.log('%c[课件] 使用本地 libs/three.module.js', 'color:#4fd1c5');
+          return bootEsm('./libs/', './libs/jsm/', '本地 libs');
+        }
+        console.warn('[课件] 本地 libs 缺失，回退 CDN（unpkg）…');
+        return bootEsm(CDN_LIST[0], CDN_LIST[0] + 'examples/jsm/', 'CDN unpkg');
+      })
+      .then(startApp)
+      .catch(function (e) {
+        showBootError(e.message + '。请确认 libs/ 目录完整，或检查网络后重试。');
+      });
+  }
+})();
+</script>
+</body>
+</html>
