@@ -30,7 +30,7 @@ jobs:
       - name: Assemble site
         run: |
           mkdir -p _site
-          cp -r index.html arcade assets _site/
+          cp -r index.html arcade assets courseware notes _site/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
