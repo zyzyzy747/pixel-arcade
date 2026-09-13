@@ -1,0 +1,2038 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="wBw84OjhrybF6P3vl40pWe">
+<head data-page-node-id="a4vQYDfcoCcuNIeb3GUEDi">
+<meta charset="utf-8" data-page-node-id="Rgbzb4hRPsYZ1tDnMQi5Xq">
+<meta name="viewport" content="width=device-width,initial-scale=1" data-page-node-id="ShrkzBGrXcePoVJYHGfh48">
+<title>食物链与食物网 · 3D 互动课件</title>
+
+<!-- ===== 样式：深色科技风 #0a1628 + 青蓝主色 + 高亮橙 ===== -->
+<style>
+:root{
+  --bg:#0a1628; --bg2:#0c1b30; --panel:#0e1f38; --panel2:#122842; --line:#1d3a5f;
+  --cyan:#4fd1c5; --orange:#ff9f43; --text:#e9f3ff; --dim:#9db4cd; --dim2:#6d86a3;
+  --green:#43d17a; --yellow:#ffd166; --red:#ff6b6b; --purple:#a96bff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--text); overflow:hidden;
+  font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Source Han Sans SC","Noto Sans CJK SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+/* ================= 整体布局 ================= */
+#app{display:flex;flex-direction:column;height:100vh}
+
+/* ---- 顶部：标题 + 场景 Tab + 演示按钮 ---- */
+#topbar{
+  height:66px;flex:0 0 66px;display:flex;align-items:center;gap:18px;padding:0 20px;
+  background:linear-gradient(180deg,#0f2540,#0a1628);border-bottom:1px solid var(--line);z-index:20;
+}
+#topbar .logo{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+#topbar .logo .dot{width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan)}
+#topbar h1{font-size:19px;font-weight:800;letter-spacing:.5px;white-space:nowrap}
+#topbar h1 small{display:block;font-size:11px;font-weight:400;color:var(--dim2);letter-spacing:1.5px;margin-top:2px}
+.tabs{display:flex;gap:8px;margin-left:6px}
+.tab{
+  padding:9px 18px;border-radius:9px;font-size:14.5px;font-weight:600;color:var(--dim);
+  background:#102b47;border:1px solid #1d3a5f;transition:.2s;white-space:nowrap;
+}
+.tab:hover:not(.locked){color:#fff;border-color:var(--cyan)}
+.tab.active{background:linear-gradient(135deg,#1a4d5e,#14405a);color:#fff;border-color:var(--cyan);box-shadow:0 0 14px rgba(79,209,197,.25)}
+.tab.locked{opacity:.45;cursor:not-allowed}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
+.btn-demo{
+  padding:9px 18px;border-radius:9px;font-size:14px;font-weight:700;
+  background:linear-gradient(135deg,#ff9f43,#ff7a45);color:#241300;box-shadow:0 3px 12px rgba(255,159,67,.3);
+}
+.btn-demo:hover{filter:brightness(1.1)}
+.progress-chip{
+  font-size:12.5px;color:var(--dim);background:#0d2135;border:1px solid var(--line);
+  padding:6px 12px;border-radius:20px;white-space:nowrap;
+}
+.progress-chip b{color:var(--cyan);font-size:14px}
+
+/* ---- 中部：舞台 + 右侧面板 ---- */
+#middle{flex:1;display:flex;min-height:0}
+#stage{position:relative;flex:1;min-width:0;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#12304f 0%,#0a1628 70%)}
+#cv{position:absolute;inset:0;display:block}
+
+/* ================= 3D 标签（屏幕投影 HTML） ================= */
+#tagLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.tag3d{
+  position:absolute;transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer;
+  padding:4px 10px;border-radius:7px;font-size:13px;white-space:nowrap;
+  background:rgba(10,26,46,.82);border:1px solid #2b5580;color:#d8e8fa;
+  backdrop-filter:blur(4px);transition:border-color .2s,background .2s,color .2s;user-select:none;
+}
+.tag3d i{display:block;font-style:normal;font-size:10.5px;color:var(--dim2);margin-top:1px}
+.tag3d:hover{border-color:var(--cyan);color:#fff}
+.tag3d.hl{background:rgba(20,64,80,.9);border-color:var(--cyan);color:#fff;box-shadow:0 0 14px rgba(79,209,197,.35)}
+.tag3d.hl i{color:#8fded4}
+.tag3d.lv{background:rgba(12,32,55,.6);border-color:#28507a;color:#a9c6e4;font-size:12px}
+.tag3d.prod{background:rgba(255,159,67,.16);border-color:var(--orange);color:#ffd7a8}
+.tag3d.step{
+  background:rgba(79,209,197,.18);border-color:var(--cyan);color:#bff3ec;
+  font-size:12px;padding:2px 8px;border-radius:20px;
+}
+.tag3d.gone{opacity:.35;text-decoration:line-through;cursor:default}
+.tag3d.chainon{background:rgba(67,209,122,.18);border-color:var(--green);color:#c9f7db}
+
+/* ================= 左下角图例 ================= */
+#legend{
+  position:absolute;left:16px;bottom:16px;background:rgba(9,22,40,.78);border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;font-size:12px;color:var(--dim);backdrop-filter:blur(6px);z-index:5;
+}
+#legend .lg-t{color:#fff;font-size:12.5px;font-weight:700;margin-bottom:7px}
+#legend .lg{display:flex;align-items:center;gap:7px;margin:4px 0}
+#legend .sw{width:12px;height:12px;border-radius:3px;flex:0 0 12px}
+#legend .arrow{color:var(--cyan);font-size:13px}
+
+/* ================= 状态胶囊（录屏一眼看懂） ================= */
+#capsule{
+  position:absolute;top:16px;left:50%;transform:translateX(-50%) translateY(-14px);
+  padding:11px 26px;border-radius:26px;font-size:19px;font-weight:800;letter-spacing:.5px;
+  background:rgba(12,32,55,.9);border:1px solid var(--cyan);color:#d9fff9;
+  box-shadow:0 6px 26px rgba(0,0,0,.45), 0 0 18px rgba(79,209,197,.18);
+  opacity:0;pointer-events:none;transition:opacity .28s,transform .28s;z-index:8;white-space:nowrap;max-width:90%;
+}
+#capsule.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#capsule.hot{border-color:var(--orange);color:#ffe4c4;box-shadow:0 6px 26px rgba(0,0,0,.45),0 0 18px rgba(255,159,67,.25)}
+#capsule.bad{border-color:var(--red);color:#ffd8d8;box-shadow:0 6px 26px rgba(0,0,0,.45),0 0 18px rgba(255,107,107,.25)}
+#capsule.good{border-color:var(--green);color:#d6ffe6;box-shadow:0 6px 26px rgba(0,0,0,.45),0 0 18px rgba(67,209,122,.25)}
+
+#hintBar{
+  position:absolute;top:62px;left:50%;transform:translateX(-50%);
+  font-size:13px;color:var(--dim2);opacity:0;transition:opacity .3s;z-index:6;white-space:nowrap;
+}
+#hintBar.show{opacity:1}
+
+/* ================= 右侧知识面板 ================= */
+#panel{
+  width:348px;flex:0 0 348px;background:linear-gradient(180deg,#0e1f38,#0a1728);
+  border-left:1px solid var(--line);display:flex;flex-direction:column;z-index:10;
+}
+#panel .p-head{padding:15px 18px 12px;border-bottom:1px solid var(--line)}
+#panel .p-head .kicker{font-size:11px;letter-spacing:2px;color:var(--cyan);font-weight:700}
+#panel .p-head h2{font-size:17px;margin-top:5px;font-weight:800}
+#panel .p-body{flex:1;overflow-y:auto;padding:14px 18px 20px}
+#panel .p-body::-webkit-scrollbar{width:7px}
+#panel .p-body::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:4px}
+.blk{margin-bottom:16px}
+.blk h3{font-size:13.5px;color:var(--cyan);margin-bottom:7px;font-weight:700;letter-spacing:.5px}
+.blk p{font-size:13.2px;line-height:1.85;color:#c8dcee}
+.blk p.big{font-size:14px;color:#e6f3ff}
+.role{display:flex;gap:9px;align-items:flex-start;margin:9px 0}
+.role .sw{width:14px;height:14px;border-radius:4px;margin-top:3px;flex:0 0 14px}
+.role .rt{font-size:13.2px;font-weight:700;color:#fff}
+.role .rd{font-size:12.2px;color:var(--dim);line-height:1.6;margin-top:1px}
+.rule{display:flex;gap:8px;margin:8px 0;font-size:13px;line-height:1.7;color:#c8dcee}
+.rule .no{width:19px;height:19px;border-radius:50%;background:#14405a;color:var(--cyan);
+  font-size:11.5px;display:flex;align-items:center;justify-content:center;flex:0 0 19px;font-weight:700;margin-top:2px}
+.chainline{
+  background:#0b1e33;border:1px solid var(--line);border-radius:9px;padding:11px 13px;
+  font-size:14px;color:#bff3ec;line-height:1.9;min-height:46px;word-break:break-all;
+}
+.chainline .arrow{color:var(--cyan);margin:0 5px;font-weight:700}
+.chainline .empty{color:var(--dim2);font-size:13px}
+.eqn{
+  background:#0b1e33;border:1px solid var(--line);border-left:3px solid var(--orange);
+  border-radius:6px;padding:9px 12px;font-size:13.5px;color:#ffe0bd;margin:8px 0;line-height:1.7;
+}
+/* 能量金字塔（CSS 梯形） */
+.pyramid{margin:10px 0 4px}
+.pyr-row{
+  height:36px;margin:0 auto 5px;display:flex;align-items:center;justify-content:center;gap:8px;
+  clip-path:polygon(9% 0,91% 0,100% 100%,0 100%);color:#08131f;font-weight:800;font-size:12.5px;
+}
+.pyr-row span{font-weight:700;opacity:.85}
+.pyr-cap{font-size:11.5px;color:var(--dim2);text-align:center;margin-top:6px;line-height:1.6}
+.kcard{
+  background:linear-gradient(135deg,#12354f,#0d2439);border:1px solid #2b5580;border-radius:10px;
+  padding:13px 15px;margin-bottom:14px;
+}
+.kcard .kf{font-size:26px;font-weight:900;color:var(--cyan);letter-spacing:1px}
+.kcard .kn{font-size:14px;color:#fff;font-weight:700;margin:3px 0 7px}
+.kcard .kd{font-size:13px;line-height:1.85;color:#c8dcee}
+.kcard .ktag{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;margin-top:9px;font-weight:700}
+.btn-back{
+  width:100%;margin-top:4px;padding:8px;border-radius:8px;font-size:13px;font-weight:700;
+  background:#122c47;border:1px solid var(--line);color:var(--cyan);
+}
+.btn-back:hover{background:#17415f}
+
+/* ================= 底部功能按钮条 ================= */
+#bottombar{
+  flex:0 0 auto;min-height:78px;display:flex;align-items:center;gap:10px;padding:11px 18px;
+  background:linear-gradient(0deg,#0b1e34,#0a1628);border-top:1px solid var(--line);flex-wrap:wrap;z-index:15;
+}
+.tools{display:none;gap:10px;align-items:center;flex-wrap:wrap}
+.tools.active{display:flex}
+.btn{
+  padding:10px 17px;border-radius:9px;font-size:14px;font-weight:700;
+  background:#123049;border:1px solid #24507c;color:#cfe6fb;transition:.18s;white-space:nowrap;
+}
+.btn:hover{background:#17415f;border-color:var(--cyan);color:#fff;transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,#17707a,#125e78);border-color:var(--cyan);color:#eafffb}
+.btn.primary:hover{filter:brightness(1.15)}
+.btn.warn{background:#3a2415;border-color:#7a4b1f;color:#ffcf9a}
+.btn.warn:hover{background:#4d2f1a;border-color:var(--orange)}
+.btn.danger{background:#3a1a1a;border-color:#7a2f2f;color:#ffbdbd}
+.btn.danger:hover{background:#4d2222;border-color:var(--red)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.bb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.bb-note{font-size:12px;color:var(--dim2)}
+
+/* ================= 引导 / 离线提示 ================= */
+#boot{
+  position:fixed;inset:0;background:#0a1628;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:16px;z-index:999;
+}
+#boot .ring{width:42px;height:42px;border:3px solid #1d3a5f;border-top-color:var(--cyan);
+  border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#boot .t{font-size:15px;color:var(--dim)}
+#boot .err{max-width:560px;text-align:center;font-size:14px;line-height:1.9;color:#ffc7a8}
+#boot .err code{background:#12283f;padding:2px 7px;border-radius:4px;color:var(--cyan);font-size:13px}
+
+/* ================= 选择题弹窗 ================= */
+.mask{
+  position:fixed;inset:0;background:rgba(4,12,24,.76);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;z-index:200;
+}
+.mask.show{display:flex}
+.qbox{
+  width:600px;max-width:92vw;background:linear-gradient(180deg,#102a44,#0b1c30);
+  border:1px solid #2b5580;border-radius:16px;padding:24px 26px;box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+.qbox .qtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.qbox .qno{font-size:12.5px;color:var(--cyan);font-weight:700;letter-spacing:1px}
+.qbox .qclose{font-size:20px;color:var(--dim);line-height:1;padding:0 4px}
+.qbox .qclose:hover{color:#fff}
+.qbox .qtext{font-size:17px;line-height:1.7;font-weight:700;margin-bottom:16px;color:#fff}
+.opt{
+  display:block;width:100%;text-align:left;padding:12px 15px;margin:8px 0;border-radius:10px;
+  background:#0d2135;border:1px solid var(--line);font-size:14.5px;color:#d3e5f7;transition:.16s;
+}
+.opt:hover{border-color:var(--cyan);background:#123049}
+.opt.correct{background:rgba(67,209,122,.16);border-color:var(--green);color:#d6ffe6}
+.opt.wrong{background:rgba(255,107,107,.14);border-color:var(--red);color:#ffd8d8}
+.opt:disabled{cursor:default}
+.expl{
+  margin-top:14px;padding:12px 15px;border-radius:10px;font-size:13.5px;line-height:1.85;display:none;
+}
+.expl.ok{display:block;background:rgba(67,209,122,.12);border:1px solid #2f7d52;color:#cdf5dd}
+.expl.no{display:block;background:rgba(255,107,107,.12);border:1px solid #7d3434;color:#ffd8d8}
+.qfoot{display:flex;gap:10px;margin-top:16px}
+.btn-next{margin-left:auto;padding:10px 22px;border-radius:9px;font-size:14px;font-weight:700;
+  background:linear-gradient(135deg,#17707a,#125e78);border:1px solid var(--cyan);color:#eafffb}
+#finishMask .qbox{text-align:center}
+.finish-big{font-size:24px;font-weight:900;color:var(--cyan);margin-bottom:10px}
+.finish-sub{font-size:14px;color:#c8dcee;line-height:1.9}
+
+/* ================= 演示模式 ================= */
+body.demo-mode #topbar,
+body.demo-mode #panel,
+body.demo-mode #bottombar,
+body.demo-mode #legend,
+body.demo-mode #hintBar{opacity:0;pointer-events:none;transition:opacity .4s ease}
+#demoExit{
+  position:fixed;right:22px;bottom:20px;font-size:13px;color:rgba(255,255,255,.55);
+  background:rgba(0,0,0,.35);padding:8px 15px;border-radius:20px;display:none;z-index:300;
+}
+body.demo-mode #demoExit{display:block}
+#summary{
+  position:fixed;inset:0;background:#04080f;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 1s ease;z-index:280;
+}
+#summary.show{opacity:1}
+#summary .st{
+  font-size:34px;font-weight:900;letter-spacing:2px;text-align:center;line-height:1.6;
+  background:linear-gradient(90deg,#4fd1c5,#ffd166);-webkit-background-clip:text;background-clip:text;color:transparent;
+  padding:0 40px;
+}
+</style>
+</head>
+<body data-page-node-id="bdNcckAlt3TMefHmgYBQv7">
+
+<div id="app" data-page-node-id="qWJeSgMUpzN3lfD4lDmOW0">
+  <!-- ===== 顶部：标题 + 场景 Tab + 演示按钮 ===== -->
+  <header id="topbar" data-page-node-id="eo0XFMO08NLNuKFPEtqwqI">
+    <div class="logo" data-page-node-id="daKwZtrJninjSOStzq9YkR">
+      <span class="dot" data-page-node-id="ZnZMfvpWlqCa5XIVAkJQyh"></span>
+      <h1 data-page-node-id="Uu5r3NV6kiCcrPw8WHUI7c">食物链与食物网 · 3D 互动课件<small data-page-node-id="Uz6ZHAiQ2V3chFAGHgOpmI">初中生物 · 生态系统</small></h1>
+    </div>
+    <nav class="tabs" data-page-node-id="WoksHn4tUDGJbOJcZ4QzCK">
+      <button class="tab active" data-scene="A" data-page-node-id="kdHYUyTvUi9mbZUWfuaMo9">A 群落成员</button>
+      <button class="tab locked" data-scene="B" data-page-node-id="lfIXEbkxj3uujmpqsBjPe5">🔒 B 连食物链</button>
+      <button class="tab locked" data-scene="C" data-page-node-id="Twg3RK3JGDv3MGD2T9bc4S">🔒 C 食物网与能量</button>
+    </nav>
+    <div class="top-actions" data-page-node-id="84naNwEuMVgdouWGFJFhI8">
+      <span class="progress-chip" data-page-node-id="fOKFlnGehVL061eCpEnhPb">闯关进度 <b id="pgText" data-page-node-id="iny3uClUhrSEsOalbQt1ls">0/6</b></span>
+      <button class="btn-demo" id="btnDemo" data-page-node-id="LgN77TEjrzJOGstsVBAJp5">▶ 演示模式</button>
+    </div>
+  </header>
+
+  <!-- ===== 中部：3D 舞台 + 右侧知识面板 ===== -->
+  <div id="middle" data-page-node-id="i4z3HhCeUL12hUb0fWsqHI">
+    <div id="stage" data-page-node-id="VJsXLKNB7t9XDZfDzXXwml">
+      <canvas id="cv" data-page-node-id="zMqF8UrPdRqVM9EpPayfuy"></canvas>
+      <div id="tagLayer" data-page-node-id="IqHrsinz8l2mhVmrKDPDf8"></div>
+      <div id="capsule" data-page-node-id="Lurx0WjtmLgrZrrC8XpRtN"></div>
+      <div id="hintBar" data-page-node-id="e94jeMLVp6u9ctkNRrmCPz"></div>
+      <div id="legend" data-page-node-id="zQehvuvaJMbI8KL4S8IlvV"></div>
+    </div>
+
+    <aside id="panel" data-page-node-id="C2yrsJHYhF2NgQoXcLJ7DF">
+      <div class="p-head" data-page-node-id="9ye6KQXL6IXetChyJQX7I7">
+        <div class="kicker" id="panelKicker" data-page-node-id="N7eEQINdxz2dxRxgY8wFzt">场景 A</div>
+        <h2 id="panelTitle" data-page-node-id="7LQ3yDcVkGFDZ0UrutEpi5">生态系统的组成</h2>
+      </div>
+      <div class="p-body" id="panelBody" data-page-node-id="7txn2B4ALAu0qDY9S7KZbU"></div>
+    </aside>
+  </div>
+
+  <!-- ===== 底部功能按钮条（按场景分组） ===== -->
+  <footer id="bottombar" data-page-node-id="opaDW84a4ssJSLPQIeguB2">
+    <!-- ===== 场景A：群落成员 ===== -->
+    <div class="tools active" id="toolsA" data-page-node-id="kTbK3yMkFephuGL7HJptPo">
+      <button class="btn primary" id="btnTour" data-page-node-id="RDaJPG4TgwXROCxfrycWca">🔍 角色巡览</button>
+      <button class="btn" id="btnSpin" data-page-node-id="iOQTn6AHLkxPUEXtgZC2hL">🔄 自动旋转</button>
+      <button class="btn" id="btnReset" data-page-node-id="FT5LKBqdBEVfX4RCuUHXVG">⌂ 复位视角</button>
+      <button class="btn warn" id="btnQuizA" data-page-node-id="scy8ZFL1R7q8mH7YFwsFpr">📝 随堂练习</button>
+    </div>
+    <!-- ===== 场景B：连食物链 ===== -->
+    <div class="tools" id="toolsB" data-page-node-id="jM85fVnyPmnwpQYpg9blpl">
+      <button class="btn primary" id="btnDemoChain" data-page-node-id="Z8fvEi1MhOG2zYhGRIQ5A5">✨ 示例链条</button>
+      <button class="btn" id="btnUndo" data-page-node-id="WGvs4ljvZN9IGYlnrwGpjQ">↩ 撤销一步</button>
+      <button class="btn primary" id="btnFinishChain" disabled data-page-node-id="P4QcNOk7KNmjkkMoYxCM0b">✅ 完成本链</button>
+      <button class="btn danger" id="btnClearChain" data-page-node-id="7Vb8AvzQB4I7P8EVSyoicO">🗑 清空链条</button>
+      <button class="btn warn" id="btnQuizB" data-page-node-id="3WnlyLw2VLEyx5bep9cZAf">📝 随堂练习</button>
+    </div>
+    <!-- ===== 场景C：食物网与能量 ===== -->
+    <div class="tools" id="toolsC" data-page-node-id="SHTuhvRnPNyf7z09Hbbm8K">
+      <button class="btn primary" id="btnWeb" data-page-node-id="KFFHvCuXJtQuvACoitH2CI">🕸 显示食物网</button>
+      <button class="btn primary" id="btnEnergy" data-page-node-id="YXFUQ3jIGTlnmS4UTxOWuC">⚡ 能量流动</button>
+      <button class="btn danger" id="btnRemove" data-page-node-id="LM8zo2BpXPmON6FaYZWVyz">✂ 移除物种</button>
+      <button class="btn" id="btnRestore" data-page-node-id="CggsEdhUpH7Nhr1TQ0ZTZh">♻ 恢复群落</button>
+      <button class="btn warn" id="btnQuizC" data-page-node-id="X5DNYhjkeNA3GWGHkRHcpa">📝 随堂练习</button>
+    </div>
+    <div class="bb-right" data-page-node-id="td4DlghIVtyQPxNHl0eHWk">
+      <span class="bb-note" id="bbNote" data-page-node-id="g5dnrR5o4zMjX1gyMxUQ7c">鼠标拖拽旋转 · 滚轮缩放 · 双击复位 · 点击生物查看知识卡</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ===== 引导层 / 离线提示 ===== -->
+<div id="boot" data-page-node-id="C0icWxjYH5UY5g3oqlsyiO">
+  <div class="ring" data-page-node-id="Zo1Y4o6glTSoKXCbKMzVSb"></div>
+  <div class="t" data-page-node-id="VyktGc6pjbOyt6Di6KbsXd">正在加载 3D 引擎…</div>
+  <div class="err" id="bootErr" style="display:none" data-page-node-id="Xe1C95lbEDBIxa8RYEeuJG"></div>
+</div>
+
+<!-- ===== 随堂选择题 ===== -->
+<div class="mask" id="qMask" data-page-node-id="arebrj0XWEBXHAeYBAYalU">
+  <div class="qbox" id="quizBox" data-page-node-id="3KC4chX7VLfXIGmIJ6ZQkT">
+    <div class="qtop" data-page-node-id="DYAJUG4TIiWdITcGK3ODiA">
+      <span class="qno" id="qNo" data-page-node-id="Cdb28bGsenjbABbu6q5y38">第 1 / 6 题</span>
+      <button class="qclose" id="qClose" data-page-node-id="kDM3HDjonF1Q5w9OZiJZHB">×</button>
+    </div>
+    <div class="qtext" id="qText" data-page-node-id="tQVxco3hPXF3Mhg01yAD9E">题目</div>
+    <div id="qOpts" data-page-node-id="CcC5Y0x7SfzAYqAPFzAaUc"></div>
+    <div class="expl" id="qExpl" data-page-node-id="bzkdcbM7yvkWvrTXqI4P9Y"></div>
+    <div class="qfoot" data-page-node-id="3YDGrcxXpmFvDvmM554AYo">
+      <button class="btn-next" id="qNext" style="display:none" data-page-node-id="4vpBD3fajrqTgAZYujjoVC">继续 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 通关面板 ===== -->
+<div class="mask" id="finishMask" data-page-node-id="pOiKg24a7pnIzEcRLbq103">
+  <div class="qbox" data-page-node-id="7OhIklIsAzTZbkwOJZWp9Z">
+    <div class="finish-big" data-page-node-id="9IknwH3KX9JYnTXIOAcvNE">🎉 全部通关！</div>
+    <div class="finish-sub" data-page-node-id="AJFEk5jTr8zNLK1BOQ1HHi">
+      你已经掌握了生态系统的组成、食物链的写法，以及能量流动的特点。<br data-page-node-id="Br7uyCeBXXs9eDKtHqiqBg">
+      记住三句话：<b data-page-node-id="RgHsEV2WU7tNkUx0MIZzSP">生产者是起点</b>、<b data-page-node-id="X2BDEaqFmav0394ktUYTJ1">箭头指向捕食者</b>、<b data-page-node-id="876LYGcb4g1TwDGlUq9Pdo">能量单向流动、逐级递减</b>。
+    </div>
+    <div class="qfoot" data-page-node-id="c9EEvuLDg765QCgqWd79Np"><button class="btn-next" id="finishClose" data-page-node-id="oppA2Gi0i31fvdjFYDbY9p">知道了</button></div>
+  </div>
+</div>
+
+<!-- ===== 演示模式提示 / 总结语 ===== -->
+<div id="demoExit" data-page-node-id="rwFDP1upUaHEAhj8erHvdO">演示中… 点击任意处退出</div>
+<div id="summary" data-page-node-id="y4gUqSHcL3jyTBhXI87eow"><div class="st" data-page-node-id="az5pWzXlDbQrBLCHfjuGlM">把抽象的食物链与食物网，<br data-page-node-id="V0mDd4Ts4EQlKm5JCONivI">变成能看、能点、能连的互动模型。</div></div>
+
+<!-- ===== three.js 引入：离线包优先 → CDN importmap 回退 ===== -->
+<script type="importmap">
+{"imports":{
+  "three":"https://unpkg.com/three@0.160.1/build/three.module.js",
+  "three/addons/":"https://unpkg.com/three@0.160.1/examples/jsm/"
+}}
+</script>
+
+<!-- =====================================================================
+     应用主逻辑
+     ===================================================================== -->
+<script>
+function startApp(THREE) {
+'use strict';
+
+/* ==================================================================
+   0. 数据表（教师可自行修改 —— 换主题只改这里）
+   ================================================================== */
+
+/* --- 0.1 角色定义：决定配色与图例 --- */
+const ROLE = {
+  producer:  { name:'生产者',     cn:'第一营养级', hex:'#43d17a', color:0x43d17a },
+  primary:   { name:'初级消费者', cn:'第二营养级', hex:'#ffd166', color:0xffd166 },
+  secondary: { name:'次级消费者', cn:'第三营养级', hex:'#ff9f43', color:0xff9f43 },
+  tertiary:  { name:'三级消费者', cn:'第四营养级', hex:'#ff6b6b', color:0xff6b6b },
+  decomposer:{ name:'分解者',     cn:'分解者',     hex:'#a96bff', color:0xa96bff },
+};
+
+/* --- 0.2 群落成员定义：位置 / 角色 / 程序化模型 / 知识卡 --- */
+const ORG_DEFS = [
+  /* 生产者 */
+  { id:'grass', name:'草', role:'producer', lv:1, build:'grass', pos:[-4.9,0.15,0.6], pick:1.05,
+    info:'草是绿色植物，能通过光合作用制造有机物，把太阳能转化成化学能储存在体内。它是生态系统中的生产者，也是食物链的起点。' },
+  { id:'shrub', name:'灌木', role:'producer', lv:1, build:'shrub', pos:[4.9,0.15,0.6], pick:1.15,
+    info:'灌木同样属于生产者。它的枝叶为植食动物提供食物和栖息场所，枯枝落叶则被分解者分解成无机物，重新回到土壤。' },
+
+  /* 初级消费者（植食动物） */
+  { id:'locust', name:'蝗虫', role:'primary', lv:2, build:'locust', pos:[-5.0,2.05,-0.6], pick:0.95,
+    info:'蝗虫以植物的叶片为食，是初级消费者（植食动物）。蝗虫大量繁殖时会形成蝗灾，使农作物严重减产。' },
+  { id:'rabbit', name:'兔', role:'primary', lv:2, build:'rabbit', pos:[-0.3,2.05,1.7], pick:1.05,
+    info:'兔吃草和灌木的嫩叶，属于初级消费者。兔的繁殖能力强，是草原上许多肉食动物的主要食物来源。' },
+  { id:'mouse', name:'鼠', role:'primary', lv:2, build:'mouse', pos:[4.8,2.05,-0.6], pick:1.0,
+    info:'鼠以植物的种子、茎叶为食，是初级消费者。它繁殖快、分布广，在食物网中同时连接着多条食物链。' },
+
+  /* 次级消费者（肉食动物） */
+  { id:'frog', name:'青蛙', role:'secondary', lv:3, build:'frog', pos:[-4.7,3.85,-1.9], pick:1.0,
+    info:'青蛙捕食蝗虫等昆虫，属于次级消费者。它是农田害虫的天敌，被称为"农田卫士"，对维持农田生态平衡很重要。' },
+  { id:'fox', name:'狐', role:'secondary', lv:3, build:'fox', pos:[0.2,3.85,1.7], pick:1.1,
+    info:'狐捕食兔和鼠，属于次级消费者。它处在食物链的中上层，能控制植食动物的数量，防止植物被过度啃食。' },
+  { id:'snake', name:'蛇', role:'secondary', lv:3, build:'snake', pos:[4.8,3.85,-1.9], pick:1.1,
+    info:'蛇捕食鼠和青蛙，属于次级消费者。它处在多条食物链的交汇点上，一旦数量骤减，会牵动整个食物网。' },
+
+  /* 三级消费者（顶级消费者） */
+  { id:'eagle', name:'鹰', role:'tertiary', lv:4, build:'eagle', pos:[0.0,5.55,-0.3], pick:1.25,
+    info:'鹰捕食蛇、鼠和兔，是这个群落里的三级消费者（顶级消费者）。它的数量最少，但体内积累的有毒物质往往最多。' },
+
+  /* 分解者 */
+  { id:'mushroom', name:'蘑菇（真菌）', role:'decomposer', lv:0, build:'mushroom', pos:[-2.7,0.15,3.5], pick:0.95,
+    info:'蘑菇属于真菌，是分解者。它把枯枝落叶和动物遗体中的有机物分解成二氧化碳、水和无机盐，供绿色植物重新利用。' },
+  { id:'bacteria', name:'腐生细菌', role:'decomposer', lv:0, build:'bacteria', pos:[2.7,0.15,3.5], pick:1.05,
+    info:'腐生细菌是分解者，个体极其微小（图中为放大示意）。它把有机物彻底分解成无机物归还环境，维持生态系统的物质循环。' },
+];
+
+/* --- 0.3 捕食关系：[被食者, 捕食者]，箭头由前者指向后者 --- */
+const LINKS = [
+  ['grass','locust'], ['grass','rabbit'], ['grass','mouse'],
+  ['shrub','rabbit'], ['shrub','locust'],
+  ['locust','frog'],
+  ['rabbit','fox'],   ['rabbit','eagle'],
+  ['mouse','fox'],    ['mouse','snake'],  ['mouse','eagle'],
+  ['frog','snake'],
+  ['snake','eagle'],
+];
+
+/* --- 0.4 预设食物链（示例链条 / 演示模式用） --- */
+const CHAINS = [
+  ['grass','locust','frog','snake','eagle'],
+  ['grass','rabbit','fox'],
+  ['grass','mouse','snake','eagle'],
+  ['shrub','rabbit','eagle'],
+  ['grass','mouse','fox'],
+  ['shrub','locust','frog','snake','eagle'],
+];
+
+/* --- 0.5 题库：每场景 2 题，共 6 题 --- */
+const QUIZ = [
+  { id:0, scene:'A', q:'下列生物中，属于生态系统"生产者"的是？',
+    opts:['兔','草','蘑菇','鹰'], ans:1,
+    expl:'生产者主要是绿色植物，能进行光合作用制造有机物。兔和鹰是消费者，蘑菇是分解者。' },
+  { id:1, scene:'A', q:'蘑菇（真菌）在生态系统中扮演的角色是？',
+    opts:['生产者','消费者','分解者','非生物部分'], ans:2,
+    expl:'蘑菇不能进行光合作用，它靠分解枯枝落叶和遗体中的有机物生活，属于分解者。' },
+
+  { id:2, scene:'B', q:'下面哪一条食物链的写法是正确的？',
+    opts:['兔 → 草','草 → 兔 → 狐','狐 → 兔 → 草','草 ← 兔 ← 狐'], ans:1,
+    expl:'食物链必须从生产者开始，箭头指向捕食者（表示能量流动的方向）。所以正确的是"草 → 兔 → 狐"。' },
+  { id:3, scene:'B', q:'在一条食物链中，数量最多、所含能量最多的一般是？',
+    opts:['生产者','初级消费者','次级消费者','三级消费者'], ans:0,
+    expl:'能量沿食物链逐级递减，所以营养级越低，生物数量和所含能量越多，生产者位于第一营养级，最多。' },
+
+  { id:4, scene:'C', q:'生态系统中能量沿食物链流动的特点是？',
+    opts:['循环流动、逐级递增','单向流动、逐级递减','双向流动、保持不变','随机流动、无规律'], ans:1,
+    expl:'能量只能从被食者流向捕食者，不能倒流（单向）；每传递一级大约只有 10%~20% 到达下一级（逐级递减）。' },
+  { id:5, scene:'C', q:'若人类大量捕杀青蛙，短时间内蝗虫的数量会怎样变化？',
+    opts:['一直减少','先增加后减少','基本不变','先减少后增加'], ans:1,
+    expl:'天敌减少 → 蝗虫先大量繁殖；随后草被啃食殆尽、食物不足 → 蝗虫数量又下降。这体现了食物网牵一发而动全身。' },
+];
+
+/* --- 0.6 GLB 模型扩展口：填入路径后自动加载并支持 AnimationMixer --- */
+const GLB_PATHS = { A:'models/community.glb', B:'models/community.glb', C:'models/foodweb.glb' };
+
+/* ==================================================================
+   1. 全局状态
+   ================================================================== */
+const ORG_BY_ID = {};
+ORG_DEFS.forEach(function (d) { ORG_BY_ID[d.id] = d; });
+
+const HOME = {
+  A: { pos:[1.0, 3.9, 15.2], tgt:[1.0, 2.7, 0] },
+  B: { pos:[1.0, 3.9, 15.2], tgt:[1.0, 2.7, 0] },
+  C: { pos:[1.0, 4.2, 16.2], tgt:[1.0, 2.7, 0] },
+};
+
+let currentScene = 'A';
+let autoSpin = false;
+let removeMode = false;
+const DEMO = { on:false, timers:[], restore:null };
+const PROG = { A:[false,false], B:[false,false], C:[false,false] };
+const UNLOCKED = { A:true, B:false, C:false };
+
+/* ==================================================================
+   2. DOM 引用
+   ================================================================== */
+const $ = function (id) { return document.getElementById(id); };
+const stage = $('stage'), canvas = $('cv'), tagLayer = $('tagLayer');
+const capsuleEl = $('capsule'), hintEl = $('hintBar'), legendEl = $('legend');
+const panelKicker = $('panelKicker'), panelTitle = $('panelTitle'), panelBody = $('panelBody');
+const qMask = $('qMask'), qNo = $('qNo'), qText = $('qText'), qOpts = $('qOpts'),
+      qExpl = $('qExpl'), qNext = $('qNext');
+const finishMask = $('finishMask'), summaryEl = $('summary');
+
+/* ==================================================================
+   3. 小工具
+   ================================================================== */
+function nameOf(id) { return ORG_BY_ID[id] ? ORG_BY_ID[id].name : id; }
+function lvOf(id) { return ORG_BY_ID[id] ? ORG_BY_ID[id].lv : 1; }
+function V3(a) { return new THREE.Vector3(a[0], a[1], a[2]); }
+function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+function lerp(a, b, t) { return a + (b - a) * t; }
+function easeInOut(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+
+/* 状态胶囊 */
+let capTimer = null;
+function capsule(text, cls, autoHide) {
+  capsuleEl.textContent = text;
+  capsuleEl.className = 'show' + (cls ? ' ' + cls : '');
+  if (capTimer) clearTimeout(capTimer);
+  if (autoHide) capTimer = setTimeout(function () { capsuleEl.className = cls || ''; }, autoHide);
+}
+function hideCapsule() { if (capTimer) clearTimeout(capTimer); capsuleEl.className = ''; }
+
+/* 小提示条 */
+let hintTimer = null;
+function hint(text) {
+  hintEl.textContent = text;
+  hintEl.className = 'show';
+  if (hintTimer) clearTimeout(hintTimer);
+  hintTimer = setTimeout(function () { hintEl.className = ''; }, 2600);
+}
+
+/* ==================================================================
+   4. 渲染器 / 相机 / 控制器（三个场景共用一套）
+   ================================================================== */
+const renderer = new THREE.WebGLRenderer({ canvas:canvas, antialias:true, alpha:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200);
+camera.position.set(1.0, 3.9, 15.2);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 6;
+controls.maxDistance = 34;
+controls.maxPolarAngle = Math.PI * 0.86;
+controls.target.set(1.0, 2.7, 0);
+
+/* 相机补间 */
+let camTween = null;
+function flyTo(pos, tgt, dur) {
+  camTween = {
+    p0:camera.position.clone(), p1:pos.clone(),
+    t0:controls.target.clone(), t1:tgt.clone(),
+    t:0, d:dur || 0.5
+  };
+}
+
+/* 灯光（每个场景各加一份） */
+function addLights(sc) {
+  sc.add(new THREE.AmbientLight(0xffffff, 0.62));
+  const hemi = new THREE.HemisphereLight(0x9fc7ff, 0x1a2d1a, 0.5);
+  sc.add(hemi);
+  const d1 = new THREE.DirectionalLight(0xffffff, 1.05);
+  d1.position.set(6, 12, 10); sc.add(d1);
+  const d2 = new THREE.DirectionalLight(0x6fa8ff, 0.45);
+  d2.position.set(-8, 5, -8); sc.add(d2);
+  const p1 = new THREE.PointLight(0x4fd1c5, 0.7, 40);
+  p1.position.set(0, 7, 8); sc.add(p1);
+}
+
+/* ==================================================================
+   5. 3D 标签系统（屏幕投影 HTML）
+   ================================================================== */
+const TAGS = [];
+const _pv = new THREE.Vector3();
+function addTag(scKey, text, sub, pos, cls, onClick) {
+  const el = document.createElement('div');
+  el.className = 'tag3d' + (cls ? ' ' + cls : '');
+  el.innerHTML = '<b>' + text + '</b>' + (sub ? '<i>' + sub + '</i>' : '');
+  if (onClick) {
+    el.addEventListener('click', function (e) { e.stopPropagation(); onClick(e); });
+  } else {
+    el.style.pointerEvents = 'none';
+  }
+  tagLayer.appendChild(el);
+  const t = { el:el, pos:pos.clone(), scene:scKey, hidden:false, dead:false };
+  TAGS.push(t);
+  t.destroy = function () {
+    t.dead = true;
+    if (el.parentNode) el.parentNode.removeChild(el);
+    const i = TAGS.indexOf(t); if (i >= 0) TAGS.splice(i, 1);
+  };
+  return t;
+}
+function updateTags() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  for (let i = 0; i < TAGS.length; i++) {
+    const t = TAGS[i];
+    if (t.dead) continue;
+    if (t.scene !== currentScene || t.hidden) { t.el.style.display = 'none'; continue; }
+    _pv.copy(t.pos).project(camera);
+    if (_pv.z > 1) { t.el.style.display = 'none'; continue; }
+    t.el.style.display = '';
+    t.el.style.left = ((_pv.x * 0.5 + 0.5) * w) + 'px';
+    t.el.style.top = ((-_pv.y * 0.5 + 0.5) * h) + 'px';
+  }
+}
+
+/* ==================================================================
+   6. 程序化几何体：生物模型（glb 缺失时的兜底）
+   ================================================================== */
+const G_SPH = new THREE.SphereGeometry(1, 20, 14);
+const G_BOX = new THREE.BoxGeometry(1, 1, 1);
+const G_CYL = new THREE.CylinderGeometry(1, 1, 1, 16);
+const G_CON = new THREE.ConeGeometry(1, 1, 16);
+const PICK_MAT = new THREE.MeshBasicMaterial({ visible:false });
+
+function mat(color, o) {
+  return new THREE.MeshStandardMaterial(Object.assign(
+    { color:color, roughness:0.62, metalness:0.04 }, o || {}));
+}
+function add(parent, geo, m, s, p, r) {
+  const mesh = new THREE.Mesh(geo, m);
+  if (typeof s === 'number') mesh.scale.setScalar(s);
+  else if (s) mesh.scale.set(s[0], s[1], s[2]);
+  if (p) mesh.position.set(p[0], p[1], p[2]);
+  if (r) mesh.rotation.set(r[0], r[1], r[2]);
+  parent.add(mesh);
+  return mesh;
+}
+
+const BUILDERS = {
+  /* ---- 草：一丛叶片 ---- */
+  grass: function () {
+    const g = new THREE.Group();
+    const m1 = mat(0x3fa34d, { roughness:.9 }), m2 = mat(0x6ec96f, { roughness:.9 });
+    for (let i = 0; i < 18; i++) {
+      const a = (i / 18) * Math.PI * 2 + Math.random() * 0.7;
+      const r = 0.22 + Math.random() * 0.78;
+      const h = 0.55 + Math.random() * 0.95;
+      const b = add(g, G_CON, (i % 2 ? m1 : m2), [0.075, h, 0.075],
+                    [Math.cos(a) * r, h * 0.5, Math.sin(a) * r]);
+      b.rotation.z = (Math.random() - 0.5) * 0.6;
+      b.rotation.x = (Math.random() - 0.5) * 0.6;
+    }
+    add(g, G_SPH, mat(0x4a3524), [0.9, 0.12, 0.9], [0, 0.05, 0]);
+    return g;
+  },
+
+  /* ---- 灌木：树干 + 叶团 ---- */
+  shrub: function () {
+    const g = new THREE.Group();
+    add(g, G_CYL, mat(0x6b4b2a), [0.13, 0.9, 0.13], [0, 0.45, 0]);
+    const f1 = mat(0x2f8f4e, { roughness:.9 }), f2 = mat(0x46b063, { roughness:.9 });
+    add(g, G_SPH, f1, [0.72, 0.58, 0.72], [0, 1.15, 0]);
+    add(g, G_SPH, f2, [0.52, 0.42, 0.52], [-0.5, 0.95, 0.16]);
+    add(g, G_SPH, f1, [0.46, 0.38, 0.46], [0.48, 1.0, -0.2]);
+    add(g, G_SPH, f2, [0.40, 0.33, 0.40], [0.05, 0.9, 0.5]);
+    return g;
+  },
+
+  /* ---- 蝗虫：身体 + 翅 + 触角 ---- */
+  locust: function () {
+    const g = new THREE.Group();
+    const body = mat(0x7cb342), dark = mat(0x33691e),
+          eye = mat(0x141414, { roughness:.2 }), wing = mat(0xd7f0b0,
+          { transparent:true, opacity:0.5, roughness:.25, side:THREE.DoubleSide });
+    add(g, G_SPH, body, [0.26, 0.24, 0.60], [0, 0.34, 0]);
+    add(g, G_SPH, dark, [0.21, 0.20, 0.22], [0, 0.38, 0.62]);
+    add(g, G_SPH, eye, 0.06, [-0.11, 0.45, 0.76]);
+    add(g, G_SPH, eye, 0.06, [0.11, 0.45, 0.76]);
+    add(g, G_CYL, dark, [0.022, 0.46, 0.022], [-0.09, 0.68, 0.72], [0.4, 0, 0.28]);
+    add(g, G_CYL, dark, [0.022, 0.46, 0.022], [0.09, 0.68, 0.72], [0.4, 0, -0.28]);
+    add(g, G_BOX, wing, [0.09, 0.02, 0.52], [-0.15, 0.52, -0.06], [-0.18, 0.12, 0]);
+    add(g, G_BOX, wing, [0.09, 0.02, 0.52], [0.15, 0.52, -0.06], [-0.18, -0.12, 0]);
+    [[-0.17, 0.30, 0.20], [0.17, 0.30, 0.20], [-0.17, 0.30, -0.12], [0.17, 0.30, -0.12],
+     [-0.19, 0.36, -0.30], [0.19, 0.36, -0.30]].forEach(function (p, i) {
+      add(g, G_CYL, dark, [0.026, 0.30, 0.026], p, [i < 4 ? 0.5 : -0.3, 0, (i % 2 ? 0.3 : -0.3)]);
+    });
+    return g;
+  },
+
+  /* ---- 兔：长耳 + 圆尾 ---- */
+  rabbit: function () {
+    const g = new THREE.Group();
+    const fur = mat(0xf4f1ea, { roughness:.95 }), fur2 = mat(0xd8d2c6, { roughness:.95 }),
+          pink = mat(0xffb3b3), eye = mat(0x181818, { roughness:.15 });
+    add(g, G_SPH, fur, [0.44, 0.38, 0.58], [0, 0.44, 0]);
+    add(g, G_SPH, fur, 0.27, [0, 0.60, 0.55]);
+    add(g, G_SPH, eye, 0.055, [-0.13, 0.66, 0.75]);
+    add(g, G_SPH, eye, 0.055, [0.13, 0.66, 0.75]);
+    add(g, G_SPH, pink, 0.055, [0, 0.55, 0.78]);
+    add(g, G_SPH, fur, [0.10, 0.36, 0.055], [-0.14, 1.02, 0.50], [-0.12, 0, 0.18]);
+    add(g, G_SPH, fur, [0.10, 0.36, 0.055], [0.14, 1.02, 0.50], [-0.12, 0, -0.18]);
+    add(g, G_SPH, fur2, 0.13, [0, 0.50, -0.58]);
+    [[-0.25, 0.13, 0.30], [0.25, 0.13, 0.30], [-0.25, 0.13, -0.26], [0.25, 0.13, -0.26]]
+      .forEach(function (p) { add(g, G_SPH, fur2, [0.13, 0.10, 0.19], p); });
+    return g;
+  },
+
+  /* ---- 鼠：长尾 + 圆耳 ---- */
+  mouse: function () {
+    const g = new THREE.Group();
+    const fur = mat(0x9aa0a6, { roughness:.92 }), pink = mat(0xffb0b0),
+          eye = mat(0x111111, { roughness:.15 });
+    add(g, G_SPH, fur, [0.30, 0.26, 0.46], [0, 0.30, 0]);
+    add(g, G_SPH, fur, 0.20, [0, 0.34, 0.46]);
+    add(g, G_SPH, pink, [0.14, 0.14, 0.045], [-0.15, 0.47, 0.42], [0, 0, 0.35]);
+    add(g, G_SPH, pink, [0.14, 0.14, 0.045], [0.15, 0.47, 0.42], [0, 0, -0.35]);
+    add(g, G_SPH, eye, 0.045, [-0.10, 0.38, 0.62]);
+    add(g, G_SPH, eye, 0.045, [0.10, 0.38, 0.62]);
+    add(g, G_SPH, pink, 0.038, [0, 0.30, 0.65]);
+    for (let i = 0; i < 8; i++) {
+      add(g, G_SPH, pink, 0.05 - i * 0.004, [0, 0.28 + i * 0.028, -0.46 - i * 0.10]);
+    }
+    [[-0.19, 0.10, 0.24], [0.19, 0.10, 0.24], [-0.19, 0.10, -0.18], [0.19, 0.10, -0.18]]
+      .forEach(function (p) { add(g, G_SPH, fur, [0.085, 0.065, 0.12], p); });
+    return g;
+  },
+
+  /* ---- 青蛙：大眼 + 蹲伏 ---- */
+  frog: function () {
+    const g = new THREE.Group();
+    const sk = mat(0x66bb6a, { roughness:.6 }), sk2 = mat(0x3d9b4c),
+          ew = mat(0xffffff, { roughness:.3 }), eb = mat(0x111111, { roughness:.15 });
+    add(g, G_SPH, sk, [0.45, 0.32, 0.50], [0, 0.34, 0]);
+    add(g, G_SPH, sk, [0.32, 0.21, 0.28], [0, 0.40, 0.42]);
+    add(g, G_SPH, ew, 0.145, [-0.18, 0.62, 0.36]);
+    add(g, G_SPH, ew, 0.145, [0.18, 0.62, 0.36]);
+    add(g, G_SPH, eb, 0.075, [-0.18, 0.66, 0.47]);
+    add(g, G_SPH, eb, 0.075, [0.18, 0.66, 0.47]);
+    [[-0.44, 0.16, 0.24], [0.44, 0.16, 0.24], [-0.44, 0.16, -0.16], [0.44, 0.16, -0.16]]
+      .forEach(function (p, i) {
+        add(g, G_SPH, sk2, [0.15, 0.10, 0.22], p, [0, 0, i < 2 ? 0.28 : -0.28]);
+      });
+    add(g, G_BOX, sk2, [0.30, 0.03, 0.10], [0, 0.52, -0.10]);
+    return g;
+  },
+
+  /* ---- 狐：尖嘴 + 大尾 ---- */
+  fox: function () {
+    const g = new THREE.Group();
+    const fur = mat(0xef7c3c, { roughness:.85 }), white = mat(0xfaf3e8, { roughness:.9 }),
+          dark = mat(0x3a2416), eye = mat(0x111111, { roughness:.15 });
+    add(g, G_SPH, fur, [0.36, 0.32, 0.60], [0, 0.46, 0]);
+    add(g, G_SPH, white, [0.24, 0.19, 0.32], [0, 0.32, 0.30]);
+    add(g, G_SPH, fur, 0.26, [0, 0.66, 0.56]);
+    add(g, G_CON, dark, [0.13, 0.28, 0.13], [0, 0.62, 0.82], [Math.PI / 2, 0, 0]);
+    add(g, G_SPH, dark, 0.05, [0, 0.63, 0.96]);
+    add(g, G_CON, fur, [0.11, 0.22, 0.07], [-0.16, 0.90, 0.52], [-0.16, 0, 0.22]);
+    add(g, G_CON, fur, [0.11, 0.22, 0.07], [0.16, 0.90, 0.52], [-0.16, 0, -0.22]);
+    add(g, G_SPH, eye, 0.05, [-0.12, 0.71, 0.74]);
+    add(g, G_SPH, eye, 0.05, [0.12, 0.71, 0.74]);
+    add(g, G_SPH, fur, [0.19, 0.19, 0.46], [0, 0.68, -0.78], [0.38, 0, 0]);
+    add(g, G_SPH, white, 0.155, [0, 0.90, -1.06]);
+    [[-0.22, 0.15, 0.32], [0.22, 0.15, 0.32], [-0.22, 0.15, -0.28], [0.22, 0.15, -0.28]]
+      .forEach(function (p) { add(g, G_CYL, dark, [0.075, 0.16, 0.075], p); });
+    return g;
+  },
+
+  /* ---- 蛇：沿正弦曲线的管状体 ---- */
+  snake: function () {
+    const g = new THREE.Group();
+    const pts = [];
+    for (let i = 0; i <= 28; i++) {
+      const t = i / 28;
+      pts.push(new THREE.Vector3(Math.sin(t * Math.PI * 2.4) * 0.55,
+                                 0.20 + Math.sin(t * Math.PI * 2.4 + 1.2) * 0.07,
+                                 -1.05 + t * 1.95));
+    }
+    const curve = new THREE.CatmullRomCurve3(pts);
+    g.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 64, 0.155, 12, false),
+                         mat(0x7cb342, { roughness:.5 })));
+    const hp = curve.getPointAt(1);
+    add(g, G_SPH, mat(0x8bc34a), [0.21, 0.17, 0.28], [hp.x, hp.y + 0.02, hp.z + 0.10]);
+    add(g, G_SPH, mat(0x111111, { roughness:.15 }), 0.05, [hp.x - 0.11, hp.y + 0.09, hp.z + 0.22]);
+    add(g, G_SPH, mat(0x111111, { roughness:.15 }), 0.05, [hp.x + 0.11, hp.y + 0.09, hp.z + 0.22]);
+    add(g, G_BOX, mat(0xff5252), [0.03, 0.02, 0.24], [hp.x, hp.y - 0.03, hp.z + 0.38]);
+    return g;
+  },
+
+  /* ---- 鹰：展翅（可扇动） ---- */
+  eagle: function () {
+    const g = new THREE.Group();
+    const br = mat(0x6d4c33, { roughness:.85 }), br2 = mat(0x8d6e4f),
+          wh = mat(0xece4d4), yl = mat(0xffc107), dk = mat(0x2b1d12),
+          eye = mat(0x111111, { roughness:.15 });
+    add(g, G_SPH, br, [0.32, 0.34, 0.48], [0, 0.52, 0]);
+    add(g, G_SPH, wh, [0.25, 0.25, 0.31], [0, 0.46, 0.32]);
+    add(g, G_SPH, br2, 0.23, [0, 0.82, 0.36]);
+    add(g, G_CON, yl, [0.095, 0.22, 0.095], [0, 0.80, 0.60], [Math.PI * 0.42, 0, 0]);
+    add(g, G_SPH, eye, 0.055, [-0.12, 0.88, 0.48]);
+    add(g, G_SPH, eye, 0.055, [0.12, 0.88, 0.48]);
+    const wl = add(g, G_BOX, br, [1.05, 0.055, 0.46], [-0.82, 0.66, -0.05]);
+    const wr = add(g, G_BOX, br, [1.05, 0.055, 0.46], [0.82, 0.66, -0.05]);
+    wl.rotation.z = 0.14; wr.rotation.z = -0.14;
+    g.userData.wings = [wl, wr];
+    add(g, G_BOX, br2, [0.38, 0.045, 0.46], [0, 0.48, -0.56], [0.28, 0, 0]);
+    add(g, G_CYL, yl, [0.05, 0.11, 0.05], [-0.14, 0.28, 0.12]);
+    add(g, G_CYL, yl, [0.05, 0.11, 0.05], [0.14, 0.28, 0.12]);
+    return g;
+  },
+
+  /* ---- 蘑菇（真菌） ---- */
+  mushroom: function () {
+    const g = new THREE.Group();
+    const stem = mat(0xf2e6d2, { roughness:.9 });
+    add(g, G_CYL, stem, [0.20, 0.72, 0.20], [0, 0.36, 0]);
+    const cap = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 26, 12, 0, Math.PI * 2, 0, Math.PI * 0.5),
+      mat(0xd94f4f, { roughness:.7 }));
+    cap.scale.set(0.70, 0.46, 0.70); cap.position.y = 0.72; g.add(cap);
+    const w = mat(0xfff3e0);
+    [[0.26, 0.90, 0.12], [-0.20, 0.92, -0.18], [0.06, 1.00, -0.30],
+     [-0.34, 0.86, 0.20], [0.36, 0.84, -0.14]].forEach(function (p) { add(g, G_SPH, w, 0.10, p); });
+    add(g, G_SPH, mat(0x6d5a44), [0.85, 0.10, 0.85], [0, 0.04, 0]);
+    return g;
+  },
+
+  /* ---- 腐生细菌（放大示意：一簇杆菌 + 虚线圈） ---- */
+  bacteria: function () {
+    const g = new THREE.Group();
+    const m1 = mat(0x9b6bff, { roughness:.4 }), m2 = mat(0xbb90ff, { roughness:.4 });
+    const spots = [[0, 0.34, 0, 0.30], [-0.45, 0.20, 0.20, -0.95], [0.43, 0.26, -0.16, 0.85],
+                   [0.06, 0.62, 0.32, 0.20], [-0.22, 0.50, -0.32, -0.55], [0.30, 0.16, 0.34, 1.15]];
+    spots.forEach(function (s, i) {
+      const rod = new THREE.Group();
+      const m = (i % 2 ? m1 : m2);
+      add(rod, G_CYL, m, [0.11, 0.38, 0.11], [0, 0, 0]);
+      add(rod, G_SPH, m, 0.11, [0, 0.19, 0]);
+      add(rod, G_SPH, m, 0.11, [0, -0.19, 0]);
+      rod.position.set(s[0], s[1], s[2]);
+      rod.rotation.z = s[3]; rod.rotation.y = i * 0.8;
+      g.add(rod);
+    });
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.022, 8, 56),
+      new THREE.MeshBasicMaterial({ color:0xa96bff, transparent:true, opacity:0.5 }));
+    ring.rotation.x = Math.PI / 2; ring.position.y = 0.06; g.add(ring);
+    return g;
+  },
+};
+
+/* ==================================================================
+   7. 场景构建
+   ================================================================== */
+const SC = {};   // { A:{scene,root,orgs,edges,picks,...}, ... }
+
+/** 建地面 + 土层 */
+function buildGround(parent) {
+  const g = new THREE.Group();
+  const soil = new THREE.Mesh(new THREE.CylinderGeometry(7.4, 6.7, 2.2, 56),
+    mat(0x33251a, { roughness:1 }));
+  soil.position.y = -1.12; g.add(soil);
+  const top = new THREE.Mesh(new THREE.CylinderGeometry(7.5, 7.5, 0.16, 56),
+    mat(0x1e4630, { roughness:.95 }));
+  top.position.y = -0.08; g.add(top);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(7.5, 0.05, 8, 64),
+    new THREE.MeshBasicMaterial({ color:0x2f6b4a }));
+  rim.rotation.x = Math.PI / 2; rim.position.y = 0.01; g.add(rim);
+  parent.add(g);
+  return g;
+}
+
+/** 建营养级分层圆盘（半透明） */
+function buildLevelPlate(parent, y, color) {
+  const r = new THREE.Mesh(new THREE.RingGeometry(0.6, 6.9, 56),
+    new THREE.MeshBasicMaterial({ color:color, transparent:true, opacity:0.075,
+      side:THREE.DoubleSide, depthWrite:false }));
+  r.rotation.x = -Math.PI / 2;
+  r.position.y = y - 0.55;
+  parent.add(r);
+  return r;
+}
+
+/** 为一个场景构建完整群落 */
+function buildCommunity(key) {
+  const sc = new THREE.Scene();
+  const obj = { scene:sc, key:key, root:new THREE.Group(), orgs:{}, orgList:[],
+                edges:[], picks:[], hl:{}, removed:{}, plates:[], edgeGroup:new THREE.Group(),
+                chain:[], chainTags:[], chainCount:0, webOn:false, energyOn:false };
+  sc.add(obj.root);
+  addLights(sc);
+  buildGround(obj.root);
+  obj.root.add(obj.edgeGroup);
+
+  const LV_Y = { 1:0.15, 2:2.05, 3:3.85, 4:5.55 };
+  /* 营养级分层圆盘 */
+  [1, 2, 3, 4].forEach(function (lv) {
+    const col = lv === 1 ? 0x43d17a : lv === 2 ? 0xffd166 : lv === 3 ? 0xff9f43 : 0xff6b6b;
+    obj.plates.push(buildLevelPlate(obj.root, LV_Y[lv], col));
+  });
+  /* 分解者小圈 */
+  const dr = new THREE.Mesh(new THREE.RingGeometry(0.4, 2.5, 48),
+    new THREE.MeshBasicMaterial({ color:0xa96bff, transparent:true, opacity:0.08,
+      side:THREE.DoubleSide, depthWrite:false }));
+  dr.rotation.x = -Math.PI / 2; dr.position.set(0, -0.4, 3.5); obj.root.add(dr);
+
+  /* 逐个生物建模 */
+  ORG_DEFS.forEach(function (def, idx) {
+    const b = BUILDERS[def.build];
+    if (!b) { console.warn('[课件] 缺少模型构建器：' + def.build); return; }
+    const g = b();
+    g.position.set(def.pos[0], def.pos[1], def.pos[2]);
+
+    /* 每个生物的材质单独克隆，便于高亮 / 淡出 */
+    const mats = [];
+    g.traverse(function (o) {
+      if (o.isMesh && o.material && o.material !== PICK_MAT) {
+        o.material = o.material.clone();
+        mats.push({ m:o.material,
+                    e:o.material.emissive ? o.material.emissive.getHex() : 0x000000,
+                    ei:o.material.emissiveIntensity !== undefined ? o.material.emissiveIntensity : 1 });
+      }
+    });
+
+    /* 拾取代理球（不渲染，仅用于射线点击） */
+    const pk = new THREE.Mesh(G_SPH, PICK_MAT);
+    pk.scale.setScalar(def.pick || 1.0);
+    pk.position.y = 0.62;
+    pk.userData.orgId = def.id;
+    g.add(pk);
+    obj.picks.push(pk);
+
+    obj.root.add(g);
+    const org = { id:def.id, def:def, group:g, mats:mats, baseY:def.pos[1],
+                  phase:idx * 1.31, wings:g.userData.wings || null, hl:false, dead:false };
+    obj.orgs[def.id] = org;
+    obj.orgList.push(org);
+  });
+
+  /* 生物名标签 */
+  obj.orgList.forEach(function (org) {
+    const d = org.def;
+    const r = ROLE[d.role];
+    const lp = new THREE.Vector3(d.pos[0], d.pos[1] + (d.id === 'eagle' ? 1.75 : 1.55), d.pos[2]);
+    org.tag = addTag(key, d.name, r.name, lp, '', function () { onOrgClick(key, d.id); });
+  });
+
+  /* 营养级侧边标签 */
+  [1, 2, 3, 4].forEach(function (lv) {
+    const rn = ['', '第一营养级', '第二营养级', '第三营养级', '第四营养级'][lv];
+    const sub = ['', '生产者', '初级消费者', '次级消费者', '三级消费者'][lv];
+    addTag(key, rn, sub, new THREE.Vector3(-7.4, LV_Y[lv], 0), 'lv', null);
+  });
+  addTag(key, '分解者', '真菌与细菌', new THREE.Vector3(0, 0.2, 5.2), 'lv', null);
+
+  /* 尝试加载 GLB：成功则替换程序化模型，失败静默回退 */
+  loadGLB(key, obj);
+
+  return obj;
+}
+
+/** GLB 加载（失败自动回退，控制台仅打警告） */
+function loadGLB(key, obj) {
+  const url = GLB_PATHS[key];
+  if (!url || typeof THREE.GLTFLoader !== 'function') return;
+  const loader = new THREE.GLTFLoader();
+  loader.load(url, function (gltf) {
+    const m = gltf.scene;
+    const box = new THREE.Box3().setFromObject(m);
+    const size = box.getSize(new THREE.Vector3());
+    const k = 9 / Math.max(size.x, size.y, size.z, 0.001);
+    m.scale.setScalar(k);
+    obj.root.add(m);
+    if (gltf.animations && gltf.animations.length) {
+      const mixer = new THREE.AnimationMixer(m);
+      gltf.animations.forEach(function (c) { mixer.clipAction(c).play(); });
+      obj.mixer = mixer;
+    }
+    console.log('[课件] 场景 ' + key + ' 已加载模型：' + url);
+  }, undefined, function () {
+    console.warn('[课件] 未找到模型 ' + url + '，已使用程序化模型兜底。');
+  });
+}
+
+/* ==================================================================
+   8. 高亮 / 移除 效果
+   ================================================================== */
+function setHighlight(key, id, on) {
+  const obj = SC[key]; if (!obj) return;
+  const org = obj.orgs[id]; if (!org || org.dead) return;
+  org.hl = on;
+  if (on) obj.hl[id] = true; else delete obj.hl[id];
+  org.mats.forEach(function (x) {
+    if (!x.m.emissive) return;
+    if (on) { x.m.emissive.setHex(0x2fbfae); x.m.emissiveIntensity = 0.5; }
+    else { x.m.emissive.setHex(x.e); x.m.emissiveIntensity = x.ei; }
+  });
+  if (org.tag) org.tag.el.className = 'tag3d' + (on ? ' hl' : '');
+}
+function clearHighlight(key) {
+  const obj = SC[key]; if (!obj) return;
+  Object.keys(obj.hl).forEach(function (id) { setHighlight(key, id, false); });
+}
+
+/** 让某个生物"消失"（场景C 移除物种） */
+function killOrg(key, id) {
+  const obj = SC[key]; if (!obj) return;
+  const org = obj.orgs[id]; if (!org || org.dead) return;
+  org.dead = true;
+  org.killT = 0;
+  if (org.tag) { org.tag.el.className = 'tag3d gone'; }
+  obj.removed[id] = true;
+}
+function reviveOrg(key, id) {
+  const obj = SC[key]; if (!obj) return;
+  const org = obj.orgs[id]; if (!org) return;
+  org.dead = false; org.killT = 0;
+  org.group.scale.setScalar(1);
+  org.group.visible = true;
+  if (org.tag) org.tag.el.className = 'tag3d';
+  delete obj.removed[id];
+}
+
+/* ==================================================================
+   9. 连线（食物链箭头）工具
+   ================================================================== */
+const ARROW_UP = new THREE.Vector3(0, 1, 0);
+function makeEdge(obj, fromId, toId, opt) {
+  opt = opt || {};
+  const a = obj.orgs[fromId], b = obj.orgs[toId];
+  if (!a || !b) return null;
+  const pa = a.group.position.clone(), pb = b.group.position.clone();
+  /* 两端各缩一点，避免箭头插进生物体内 */
+  const dir = pb.clone().sub(pa);
+  const len = dir.length(); dir.normalize();
+  const p0 = pa.clone().addScaledVector(dir, Math.min(0.95, len * 0.22));
+  const p1 = pb.clone().addScaledVector(dir, -Math.min(1.05, len * 0.26));
+  const mid = p0.clone().add(p1).multiplyScalar(0.5);
+  mid.y += Math.max(0.55, p0.distanceTo(p1) * 0.16);
+  mid.z += 0.12;
+  const curve = new THREE.QuadraticBezierCurve3(p0, mid, p1);
+
+  const g = new THREE.Group();
+  const color = opt.color !== undefined ? opt.color : 0x4fd1c5;
+  const tubeMat = new THREE.MeshStandardMaterial({
+    color:color, emissive:color, emissiveIntensity:0.55,
+    transparent:true, opacity:opt.opacity !== undefined ? opt.opacity : 0.85, roughness:0.35 });
+  const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 48, opt.r || 0.048, 8, false), tubeMat);
+  g.add(tube);
+
+  /* 箭头（圆锥，指向捕食者） */
+  const tan = curve.getTangentAt(1).normalize();
+  const headMat = new THREE.MeshStandardMaterial({
+    color:color, emissive:color, emissiveIntensity:0.7,
+    transparent:true, opacity:opt.opacity !== undefined ? opt.opacity : 0.9, roughness:0.3 });
+  const head = new THREE.Mesh(new THREE.ConeGeometry((opt.r || 0.048) * 3.6, 0.30, 14), headMat);
+  head.position.copy(p1).addScaledVector(tan, 0.10);
+  head.quaternion.setFromUnitVectors(ARROW_UP, tan);
+  g.add(head);
+
+  /* 沿曲线流动的粒子（代表能量流动） */
+  const parts = [];
+  const pc = opt.pcolor !== undefined ? opt.pcolor : 0xbff3ec;
+  const pmat = new THREE.MeshBasicMaterial({ color:pc, transparent:true, opacity:0.95,
+    blending:THREE.AdditiveBlending, depthWrite:false });
+  const n = opt.pcount || 7;
+  for (let i = 0; i < n; i++) {
+    const m = new THREE.Mesh(G_SPH, pmat);
+    m.scale.setScalar(0.062);
+    m.userData.t = i / n;
+    m.userData.sp = 0.34 + (i % 3) * 0.045;
+    g.add(m); parts.push(m);
+  }
+
+  obj.edgeGroup.add(g);
+  const e = { group:g, curve:curve, tube:tube, head:head, tubeMat:tubeMat, headMat:headMat,
+              parts:parts, from:fromId, to:toId, pmat:pmat, broken:false };
+  obj.edges.push(e);
+  return e;
+}
+function removeEdge(obj, e) {
+  if (!e) return;
+  obj.edgeGroup.remove(e.group);
+  e.tube.geometry.dispose(); e.head.geometry.dispose();
+  const i = obj.edges.indexOf(e); if (i >= 0) obj.edges.splice(i, 1);
+}
+function clearEdges(obj) {
+  obj.edges.slice().forEach(function (e) { removeEdge(obj, e); });
+}
+
+/* ==================================================================
+   10. 场景 A：群落成员
+   ================================================================== */
+const TOUR = [
+  { ids:['grass','shrub'],       t:'第一营养级 · 生产者', d:'绿色植物，能制造有机物' },
+  { ids:['locust','rabbit','mouse'], t:'第二营养级 · 初级消费者', d:'植食动物，直接以植物为食' },
+  { ids:['frog','fox','snake'],  t:'第三营养级 · 次级消费者', d:'肉食动物，以植食动物为食' },
+  { ids:['eagle'],               t:'第四营养级 · 三级消费者', d:'顶级消费者，数量最少' },
+  { ids:['mushroom','bacteria'], t:'分解者 · 真菌与细菌', d:'把有机物分解成无机物' },
+];
+let tourIdx = -1, tourTimer = null;
+
+function panelA() {
+  panelKicker.textContent = '场景 A';
+  panelTitle.textContent = '生态系统的组成';
+  let h = '';
+  h += '<div class="blk"><h3>生物部分 · 三大角色</h3>';
+  ['producer', 'primary', 'secondary', 'tertiary', 'decomposer'].forEach(function (k) {
+    const r = ROLE[k];
+    const d = {
+      producer:'绿色植物。能进行光合作用制造有机物，是食物链的起点。',
+      primary:'植食动物。直接以植物为食，如蝗虫、兔、鼠。',
+      secondary:'以植食动物为食的肉食动物，如青蛙、狐、蛇。',
+      tertiary:'以次级消费者为食的大型肉食动物，如鹰。数量最少。',
+      decomposer:'真菌与细菌。把动植物遗体中的有机物分解成无机物，归还环境。',
+    }[k];
+    h += '<div class="role"><span class="sw" style="background:' + r.hex + '"></span>'
+       + '<div><div class="rt">' + r.name + '</div><div class="rd">' + d + '</div></div></div>';
+  });
+  h += '</div>';
+  h += '<div class="blk"><h3>非生物部分</h3><p>阳光、空气、水、温度、土壤等。它们为生物提供能量、物质和生存空间。</p></div>';
+  h += '<div class="blk"><h3>课堂提问</h3><p>一个生态系统里，如果只有生产者和消费者、没有分解者，会出现什么情况？</p></div>';
+  panelBody.innerHTML = h;
+}
+
+function stopTour() {
+  if (tourTimer) { clearInterval(tourTimer); tourTimer = null; }
+  tourIdx = -1;
+  clearHighlight('A');
+}
+function runTour() {
+  if (tourTimer) { stopTour(); capsule('已停止巡览', '', 1200); return; }
+  tourIdx = -1;
+  const step = function () {
+    clearHighlight('A');
+    tourIdx++;
+    if (tourIdx >= TOUR.length) {
+      stopTour();
+      capsule('巡览完毕：生产者 → 消费者 → 分解者', 'good', 2600);
+      setTimeout(function () { if (!isDemo()) maybeQuiz('A'); }, 1200);
+      return;
+    }
+    const s = TOUR[tourIdx];
+    s.ids.forEach(function (id) { setHighlight('A', id, true); });
+    const o = SC.A.orgs[s.ids[0]];
+    if (o) {
+      const p = o.group.position;
+      flyTo(new THREE.Vector3(p.x * 0.35 + 1.0, p.y + 2.4, 11.5),
+            new THREE.Vector3(p.x * 0.5 + 1.0, p.y + 0.4, 0), 0.75);
+    }
+    capsule('第 ' + (tourIdx + 1) + '/5 站：' + s.t, 'hot', 2200);
+    hint(s.d);
+  };
+  step();
+  tourTimer = setInterval(step, 2100);
+}
+
+function onOrgClick(key, id) {
+  const def = ORG_BY_ID[id]; if (!def) return;
+  if (key === 'C' && removeMode) { doRemove(id); return; }
+
+  if (key === 'B') { chainPick(id); showCard(id); return; }
+
+  /* A / C：高亮 + 聚焦 + 知识卡 */
+  clearHighlight(key);
+  setHighlight(key, id, true);
+  const o = SC[key].orgs[id];
+  if (o) {
+    const p = o.group.position;
+    flyTo(new THREE.Vector3(p.x * 0.4 + 1.0, p.y + 2.6, 11.0),
+          new THREE.Vector3(p.x * 0.6 + 1.0, p.y + 0.5, 0), 0.5);
+  }
+  capsule(def.name + ' · ' + ROLE[def.role].name, 'hot', 2400);
+  showCard(id);
+}
+
+function cardHTML(id) {
+  const d = ORG_BY_ID[id]; if (!d) return '';
+  const r = ROLE[d.role];
+  return '<div class="kcard" id="kcardWrap">'
+    + '<div class="kn">' + d.name + '</div>'
+    + '<div class="kd">' + d.info + '</div>'
+    + '<div class="ktag" style="background:' + r.hex + '22;color:' + r.hex + ';border:1px solid ' + r.hex + '66">'
+    + r.name + ' · ' + r.cn + '</div>'
+    + '<button class="btn-back" id="btnCardBack">← 收起知识卡</button>'
+    + '</div>';
+}
+function showCard(id) {
+  const d = ORG_BY_ID[id]; if (!d) return;
+  const old = document.getElementById('kcardWrap');
+  if (old && old.parentNode) old.parentNode.removeChild(old);
+
+  if (currentScene === 'B') {
+    /* 场景 B：知识卡插在面板顶部，不覆盖"正在连的链条" */
+    panelBody.insertAdjacentHTML('afterbegin', cardHTML(id));
+  } else {
+    const back = function () {
+      if (currentScene === 'A') panelA(); else panelC();
+    };
+    panelTitle.textContent = '知识卡';
+    panelBody.innerHTML = cardHTML(id);
+    panelBody.dataset.backScene = currentScene;
+    $('btnCardBack').addEventListener('click', back);
+  }
+  const bb = $('btnCardBack');
+  if (bb) bb.addEventListener('click', function () {
+    const o = document.getElementById('kcardWrap');
+    if (o && o.parentNode) o.parentNode.removeChild(o);
+  });
+}
+
+/* ==================================================================
+   11. 场景 B：连食物链
+   ================================================================== */
+let chainBusy = false;
+
+function panelB() {
+  panelKicker.textContent = '场景 B';
+  panelTitle.textContent = '连一条食物链';
+  let h = '';
+  h += '<div class="blk"><h3>食物链的写法规则</h3>';
+  h += '<div class="rule"><span class="no">1</span><div>必须<b>从生产者开始</b>（绿色植物是起点）。</div></div>';
+  h += '<div class="rule"><span class="no">2</span><div><b>箭头指向捕食者</b>，表示能量流动的方向：草 → 兔 → 狐。</div></div>';
+  h += '<div class="rule"><span class="no">3</span><div>只包括<b>生产者和消费者</b>，不写分解者、不写非生物部分。</div></div>';
+  h += '<div class="rule"><span class="no">4</span><div>相邻两个环节之间必须<b>存在真实的捕食关系</b>。</div></div>';
+  h += '</div>';
+  h += '<div class="blk"><h3>你正在连的链条</h3><div class="chainline" id="chainLine"></div></div>';
+  h += '<div class="blk"><h3>已完成</h3><p>已成功连成 <b id="chainCnt" style="color:var(--cyan);font-size:17px">0</b> 条食物链。</p></div>';
+  panelBody.innerHTML = h;
+  renderChain();
+}
+
+function renderChain() {
+  const obj = SC.B; if (!obj) return;
+  const el = $('chainLine'); if (!el) return;
+  if (!obj.chain.length) {
+    el.innerHTML = '<span class="empty">还没有开始。请点击一株绿色植物（生产者）作为起点。</span>';
+  } else {
+    el.innerHTML = obj.chain.map(function (id, i) {
+      return (i ? '<span class="arrow">→</span>' : '') + nameOf(id);
+    }).join('') + '<br><span style="font-size:12px;color:#6d86a3">共 ' + obj.chain.length + ' 个环节</span>';
+  }
+  const cnt = $('chainCnt'); if (cnt) cnt.textContent = obj.chainCount;
+  $('btnFinishChain').disabled = obj.chain.length < 3;
+}
+
+function chainPick(id) {
+  if (chainBusy) return;
+  const obj = SC.B;
+  const def = ORG_BY_ID[id];
+  if (obj.removed[id]) { capsule('该生物已被移除（仅在场景 C）', 'bad', 1600); return; }
+
+  /* 起点：必须是生产者 */
+  if (!obj.chain.length) {
+    if (def.role !== 'producer') {
+      capsule('✘ 食物链必须从生产者（绿色植物）开始！', 'bad', 2200);
+      shakeOrg('B', id);
+      hint('提示：先点「草」或「灌木」。');
+      return;
+    }
+    obj.chain.push(id);
+    setHighlight('B', id, true);
+    capsule('起点：' + def.name + '（生产者）', 'hot', 1800);
+    renderChain();
+    return;
+  }
+
+  /* 已在链中 */
+  if (obj.chain.indexOf(id) >= 0) {
+    capsule('「' + def.name + '」已经在链条里了', 'bad', 1600);
+    return;
+  }
+  if (def.role === 'decomposer') {
+    capsule('✘ 食物链里不写分解者哦', 'bad', 2200);
+    shakeOrg('B', id);
+    hint('提示：食物链只包括生产者和消费者。');
+    return;
+  }
+
+  const last = obj.chain[obj.chain.length - 1];
+  /* 校验捕食关系 */
+  const ok = LINKS.some(function (l) { return l[0] === last && l[1] === id; });
+  if (!ok) {
+    capsule('✘ 「' + nameOf(last) + '」不会被「' + def.name + '」直接吃掉', 'bad', 2600);
+    shakeOrg('B', id);
+    hint('提示：想一想谁吃谁，箭头要指向捕食者。');
+    return;
+  }
+
+  /* 合法：连线 */
+  obj.chain.push(id);
+  const e = makeEdge(obj, last, id, { color:0x43d17a, pcount:8 });
+  if (e) {
+    e.chainEdge = true;
+    const mp = e.curve.getPointAt(0.5);
+    const tag = addTag('B', '第 ' + obj.chain.length + ' 环', nameOf(id), mp, 'step', null);
+    obj.chainTags.push(tag);
+  }
+  setHighlight('B', id, true);
+  renderChain();
+
+  const n = obj.chain.length;
+  const top = !LINKS.some(function (l) { return l[0] === id; });
+  if (top && n >= 3) {
+    capsule('✔ 完整食物链（' + n + ' 级）！顶级消费者是「' + def.name + '」', 'good', 3200);
+    hint('点「✅ 完成本链」保存这条链，或继续加环。');
+  } else {
+    capsule('✔ 正确：' + nameOf(last) + ' → ' + def.name + '（第 ' + n + ' 环）', 'good', 2200);
+  }
+}
+
+function shakeOrg(key, id) {
+  const obj = SC[key]; if (!obj) return;
+  const org = obj.orgs[id]; if (!org) return;
+  org.shake = 0.55;
+}
+
+function undoChain() {
+  const obj = SC.B; if (!obj) return;
+  if (!obj.chain.length) { capsule('链条已经是空的', '', 1400); return; }
+  const id = obj.chain.pop();
+  setHighlight('B', id, false);
+  /* 删除最后一条边 */
+  for (let i = obj.edges.length - 1; i >= 0; i--) {
+    if (obj.edges[i].chainEdge) { removeEdge(obj, obj.edges[i]); break; }
+  }
+  const t = obj.chainTags.pop(); if (t) t.destroy();
+  renderChain();
+  capsule('已撤销一步，当前 ' + obj.chain.length + ' 个环节', '', 1800);
+}
+
+function clearChain(silent) {
+  const obj = SC.B; if (!obj) return;
+  obj.chain.length = 0;
+  obj.edges.slice().forEach(function (e) { if (e.chainEdge) removeEdge(obj, e); });
+  obj.chainTags.forEach(function (t) { t.destroy(); });
+  obj.chainTags.length = 0;
+  clearHighlight('B');
+  renderChain();
+  if (!silent) capsule('链条已清空', '', 1500);
+}
+
+function finishChain() {
+  const obj = SC.B; if (!obj) return;
+  if (obj.chain.length < 3) { capsule('至少要 3 个环节才算一条食物链', 'bad', 2000); return; }
+  obj.chainCount++;
+  const txt = obj.chain.map(nameOf).join(' → ');
+  capsule('🎉 第 ' + obj.chainCount + ' 条完成：' + txt, 'good', 3400);
+  setTimeout(function () {
+    clearChain(true);
+    if (!isDemo()) maybeQuiz('B');
+  }, 1500);
+}
+
+/** 自动播放一条示例链条 */
+function demoChain(list) {
+  const obj = SC.B;
+  clearChain(true);
+  chainBusy = true;
+  const arr = list || CHAINS[0];
+  let i = 0;
+  const step = function () {
+    if (i >= arr.length || !SC.B) { chainBusy = false; return; }
+    chainPick(arr[i]);
+    i++;
+    if (i < arr.length) setTimeout(step, 950);
+    else {
+      setTimeout(function () {
+        chainBusy = false;
+        capsule('示例链条：' + arr.map(nameOf).join(' → '), 'good', 3400);
+        if (!isDemo()) setTimeout(function () { maybeQuiz('B'); }, 1600);
+      }, 900);
+    }
+  };
+  step();
+}
+
+/* ==================================================================
+   12. 场景 C：食物网与能量
+   ================================================================== */
+function panelC() {
+  panelKicker.textContent = '场景 C';
+  panelTitle.textContent = '食物网与能量流动';
+  let h = '';
+  h += '<div class="blk"><h3>什么是食物网？</h3>'
+     + '<p>在一个生态系统中，多条食物链彼此交错，形成网状结构，叫<b>食物网</b>。'
+     + '一种生物往往同时处在多条食物链上，所以食物网比单条食物链更稳定。</p></div>';
+  h += '<div class="blk"><h3>能量流动的特点</h3>'
+     + '<p class="big"><b style="color:var(--cyan)">单向流动</b> · <b style="color:var(--orange)">逐级递减</b></p>'
+     + '<p>能量只能沿着"被食者 → 捕食者"的方向流动，不能倒流；每经过一个营养级，'
+     + '大约只有 <b>10%~20%</b> 的能量传递到下一级，其余在呼吸作用中散失。</p></div>';
+  h += '<div class="blk"><h3>能量金字塔</h3>'
+     + '<div class="pyramid">'
+     + pyrRow(100, '四级 · 三级消费者', '0.1%~0.8%', '#ff6b6b')
+     + pyrRow(74,  '三级 · 次级消费者', '1%~4%', '#ff9f43')
+     + pyrRow(54,  '二级 · 初级消费者', '10%~20%', '#ffd166')
+     + pyrRow(36,  '一级 · 生产者', '100%', '#43d17a')
+     + '</div><div class="pyr-cap">营养级越高，生物数量越少、能量越少；<br>但难分解的有毒物质反而<b style="color:var(--red)">越积越多</b>（生物富集）。</div></div>';
+  h += '<div class="blk"><h3>生态平衡</h3>'
+     + '<p>食物网中某种生物数量骤变，会牵动整张网。点「✂ 移除物种」试试看。</p></div>';
+  panelBody.innerHTML = h;
+}
+function pyrRow(w, t, v, c) {
+  return '<div class="pyr-row" style="width:' + w + '%;background:' + c + '">'
+       + '<span>' + t + '</span><b>' + v + '</b></div>';
+}
+
+function showWeb() {
+  const obj = SC.C; if (!obj) return;
+  if (obj.webOn) { clearEdges(obj); obj.webOn = false; capsule('已收起食物网', '', 1400); return; }
+  clearEdges(obj);
+  LINKS.forEach(function (l, i) {
+    if (obj.removed[l[0]] || obj.removed[l[1]]) return;
+    const lv = lvOf(l[1]);
+    const col = lv === 2 ? 0x43d17a : lv === 3 ? 0xffd166 : lv === 4 ? 0xff9f43 : 0xff6b6b;
+    makeEdge(obj, l[0], l[1], { color:col, opacity:0.34, r:0.032, pcount:0 });
+  });
+  obj.webOn = true;
+  obj.energyOn = false;
+  capsule('食物网：' + LINKS.length + ' 条捕食关系交错成网', 'hot', 3000);
+  hint('点「⚡ 能量流动」看能量怎么沿网流动。');
+}
+
+function runEnergy() {
+  const obj = SC.C; if (!obj) return;
+  if (!obj.webOn) { showWeb(); }
+  obj.energyOn = !obj.energyOn;
+  if (obj.energyOn) {
+    /* 给每条边补上流动粒子 */
+    obj.edges.forEach(function (e, i) {
+      if (e.parts.length) return;
+      const pc = 0xbff3ec;
+      const pmat = new THREE.MeshBasicMaterial({ color:pc, transparent:true, opacity:0.95,
+        blending:THREE.AdditiveBlending, depthWrite:false });
+      const n = 5;
+      for (let k = 0; k < n; k++) {
+        const m = new THREE.Mesh(G_SPH, pmat);
+        m.scale.setScalar(0.055);
+        m.userData.t = (k / n + i * 0.13) % 1;
+        m.userData.sp = 0.3 + (k % 3) * 0.05;
+        e.group.add(m); e.parts.push(m);
+      }
+    });
+    capsule('⚡ 能量沿食物网单向流动、逐级递减…', 'hot', 5200);
+    hint('注意：箭头的方向就是能量流动的方向，不能倒流。');
+    setTimeout(function () {
+      if (obj.energyOn) { obj.energyOn = false; }
+    }, 8000);
+  } else {
+    capsule('已停止能量流动演示', '', 1600);
+  }
+}
+
+function toggleRemove() {
+  removeMode = !removeMode;
+  const b = $('btnRemove');
+  b.textContent = removeMode ? '✂ 点生物移除（进行中）' : '✂ 移除物种';
+  b.className = removeMode ? 'btn primary' : 'btn danger';
+  capsule(removeMode ? '移除模式：请点击任意一个生物' : '已退出移除模式', removeMode ? 'bad' : '', 2400);
+  if (removeMode) hint('点「♻ 恢复群落」可以还原。');
+}
+
+function doRemove(id) {
+  const obj = SC.C;
+  if (obj.removed[id]) { capsule('「' + nameOf(id) + '」已经被移除了', 'bad', 1600); return; }
+  killOrg('C', id);
+  /* 断开相连的边 */
+  const affected = [];
+  obj.edges.slice().forEach(function (e) {
+    if (e.from === id || e.to === id) {
+      e.tubeMat.color.setHex(0xff5252); e.tubeMat.emissive.setHex(0xff5252);
+      e.headMat.color.setHex(0xff5252); e.headMat.emissive.setHex(0xff5252);
+      e.broken = true; e.breakT = 0;
+      if (e.from === id) affected.push(e.to); else affected.push(e.from);
+    }
+  });
+  const prey = LINKS.filter(function (l) { return l[1] === id; }).map(function (l) { return nameOf(l[0]); });
+  const pred = LINKS.filter(function (l) { return l[0] === id; }).map(function (l) { return nameOf(l[1]); });
+  let msg = '移除「' + nameOf(id) + '」：';
+  if (pred.length) msg += '捕食它的 ' + pred.join('、') + ' 会食物短缺而减少；';
+  if (prey.length) msg += '被它吃的 ' + prey.join('、') + ' 会因天敌减少而暴增。';
+  capsule(msg, 'bad', 5200);
+  hint('食物网牵一发而动全身 —— 这就是生态平衡容易被破坏的原因。');
+  removeMode = false;
+  const b = $('btnRemove'); b.textContent = '✂ 移除物种'; b.className = 'btn danger';
+}
+
+function restoreAll() {
+  const obj = SC.C; if (!obj) return;
+  Object.keys(obj.removed).forEach(function (id) { reviveOrg('C', id); });
+  obj.removed = {};
+  clearEdges(obj);
+  obj.webOn = false; obj.energyOn = false;
+  capsule('群落已恢复原状 ♻', 'good', 2200);
+}
+
+/* ==================================================================
+   13. 场景切换
+   ================================================================== */
+function goScene(key, force) {
+  if (!UNLOCKED[key] && !force) {
+    const need = key === 'B' ? 'A' : 'B';
+    capsule('🔒 请先完成场景 ' + need + ' 的随堂练习', 'bad', 3200);
+    return false;
+  }
+  if (key === currentScene && !force) return true;
+  currentScene = key;
+  document.querySelectorAll('.tab').forEach(function (t) {
+    t.classList.toggle('active', t.dataset.scene === key);
+  });
+  document.querySelectorAll('.tools').forEach(function (t) {
+    t.classList.toggle('active', t.id === 'tools' + key);
+  });
+  const h = HOME[key];
+  flyTo(V3(h.pos), V3(h.tgt), 0.5);
+  if (key === 'A') panelA();
+  else if (key === 'B') { panelB(); }
+  else { panelC(); }
+  hideCapsule();
+  updateLegend();
+  return true;
+}
+
+function updateLegend() {
+  let h = '<div class="lg-t">图例</div>';
+  ['producer', 'primary', 'secondary', 'tertiary', 'decomposer'].forEach(function (k) {
+    const r = ROLE[k];
+    h += '<div class="lg"><span class="sw" style="background:' + r.hex + '"></span>' + r.name + '</div>';
+  });
+  h += '<div class="lg" style="margin-top:7px"><span class="arrow">→</span>箭头 = 能量流动方向</div>';
+  legendEl.innerHTML = h;
+}
+
+/* ==================================================================
+   14. 随堂选择题 + 解锁
+   ================================================================== */
+let quizIdx = -1, quizLocked = false, answered = false;
+
+function quizOfScene(sc) {
+  const r = [];
+  QUIZ.forEach(function (q) { if (q.scene === sc) r.push(q.id); });
+  return r;
+}
+function openQuiz(sc) {
+  const ids = quizOfScene(sc);
+  let pick = -1;
+  for (let i = 0; i < ids.length; i++) { if (!PROG[sc][i]) { pick = ids[i]; break; } }
+  if (pick < 0) {
+    const all = ids.every(function (_, i) { return PROG[sc][i]; });
+    if (all) { capsule('本场景的题目已经全部答对啦 👍', 'good', 2400); }
+    return;
+  }
+  quizIdx = pick; quizLocked = true;
+  renderQuiz();
+  qMask.classList.add('show');
+}
+function maybeQuiz(sc) {
+  if (isDemo()) return;
+  const ids = quizOfScene(sc);
+  const done = ids.every(function (id) { return QUIZ[id].done; });
+  if (done) return;
+  setTimeout(function () { openQuiz(sc); }, 500);
+}
+function renderQuiz() {
+  const q = QUIZ[quizIdx];
+  answered = false;
+  const ids = quizOfScene(q.scene);
+  const nth = ids.indexOf(q.id) + 1, total = ids.length;
+  const gDone = QUIZ.filter(function (x) { return x.done; }).length;
+  qNo.textContent = '场景 ' + q.scene + ' · 第 ' + nth + '/' + total + ' 题（总进度 ' + gDone + '/6）';
+  qText.textContent = q.q;
+  qExpl.className = 'expl'; qExpl.textContent = '';
+  qNext.style.display = 'none';
+  qOpts.innerHTML = '';
+  q.opts.forEach(function (t, i) {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.textContent = 'ABCD'.charAt(i) + '. ' + t;
+    b.addEventListener('click', function () { answer(i, b); });
+    qOpts.appendChild(b);
+  });
+}
+function answer(i, btn) {
+  if (answered) return;
+  answered = true;
+  const q = QUIZ[quizIdx];
+  const btns = qOpts.querySelectorAll('.opt');
+  if (i === q.ans) {
+    btn.classList.add('correct');
+    qExpl.className = 'expl ok';
+    qExpl.innerHTML = '✅ <b>答对了！</b> ' + q.expl;
+    q.done = true;
+    const ids = quizOfScene(q.scene);
+    PROG[q.scene][ids.indexOf(q.id)] = true;
+    updateProgress();
+    const allScene = ids.every(function (id) { return QUIZ[id].done; });
+    if (allScene) unlockNext(q.scene);
+    const allDone = QUIZ.every(function (x) { return x.done; });
+    qNext.style.display = '';
+    qNext.textContent = allDone ? '查看成绩 🎉' : '下一题 →';
+  } else {
+    btn.classList.add('wrong');
+    Array.prototype.forEach.call(btns, function (b, k) { if (k === q.ans) b.classList.add('correct'); });
+    qExpl.className = 'expl no';
+    qExpl.innerHTML = '❌ <b>再想想～</b> ' + q.expl + '<br><span style="color:#9db4cd">看完解析后，再选一次正确答案。</span>';
+    qNext.style.display = 'none';
+    setTimeout(function () { answered = false; }, 400);
+  }
+}
+function updateProgress() {
+  const n = QUIZ.filter(function (q) { return q.done; }).length;
+  $('pgText').textContent = n + '/6';
+}
+function unlockNext(sc) {
+  if (sc === 'A' && !UNLOCKED.B) {
+    UNLOCKED.B = true;
+    document.querySelector('.tab[data-scene="B"]').textContent = 'B 连食物链';
+    document.querySelector('.tab[data-scene="B"]').classList.remove('locked');
+    capsule('🔓 场景 B「连食物链」已解锁！', 'good', 3600);
+  } else if (sc === 'B' && !UNLOCKED.C) {
+    UNLOCKED.C = true;
+    document.querySelector('.tab[data-scene="C"]').textContent = 'C 食物网与能量';
+    document.querySelector('.tab[data-scene="C"]').classList.remove('locked');
+    capsule('🔓 场景 C「食物网与能量」已解锁！', 'good', 3600);
+  }
+}
+function closeQuiz() {
+  qMask.classList.remove('show');
+  quizIdx = -1; quizLocked = false; answered = false;
+}
+qNext.addEventListener('click', function () {
+  const q = QUIZ[quizIdx];
+  if (!q) { closeQuiz(); return; }
+  const allDone = QUIZ.every(function (x) { return x.done; });
+  if (allDone) { closeQuiz(); finishMask.classList.add('show'); return; }
+  const ids = quizOfScene(q.scene);
+  let next = -1;
+  for (let i = 0; i < ids.length; i++) { if (!PROG[q.scene][i]) { next = ids[i]; break; } }
+  if (next >= 0) { quizIdx = next; renderQuiz(); }
+  else {
+    /* 本场景答完，跳到下一场景未答的题 */
+    let n2 = -1;
+    for (let i = 0; i < QUIZ.length; i++) { if (!QUIZ[i].done) { n2 = i; break; } }
+    if (n2 >= 0 && UNLOCKED[QUIZ[n2].scene]) { quizIdx = n2; renderQuiz(); }
+    else { closeQuiz(); }
+  }
+});
+$('qClose').addEventListener('click', closeQuiz);
+qMask.addEventListener('click', function (e) { if (e.target === qMask) closeQuiz(); });
+$('finishClose').addEventListener('click', function () { finishMask.classList.remove('show'); });
+
+/* ==================================================================
+   15. 演示模式（25 秒时间轴）
+   ================================================================== */
+function isDemo() { return DEMO.on; }
+function demoTimer(fn, ms) { DEMO.timers.push(setTimeout(fn, ms)); }
+
+function startDemo() {
+  if (DEMO.on) return;
+  DEMO.on = true;
+  document.body.classList.add('demo-mode');
+  hideCapsule();
+  /* 记录现场 */
+  DEMO.restore = {
+    scene:currentScene,
+    chain:SC.B ? SC.B.chain.slice() : [],
+    webOn:SC.C ? SC.C.webOn : false,
+  };
+  clearChain(true);
+  stopTour();
+  if (SC.C) restoreAll();
+  goScene('A', true);
+
+  /* 0–8s：场景 A 依次高亮五个角色 */
+  demoTimer(function () { runTour(); }, 200);
+
+  /* 8–16s：场景 B 自动连链 */
+  demoTimer(function () {
+    stopTour();
+    goScene('B', true);
+    capsule('场景 B · 连一条食物链', 'hot', 2400);
+  }, 8000);
+  demoTimer(function () { demoChain(CHAINS[1]); }, 8900);
+
+  /* 16–23s：场景 C 食物网 + 能量流动 + 移除物种 */
+  demoTimer(function () {
+    goScene('C', true);
+    capsule('场景 C · 食物网与能量流动', 'hot', 2600);
+  }, 16000);
+  demoTimer(function () { showWeb(); }, 16600);
+  demoTimer(function () { runEnergy(); }, 18200);
+  demoTimer(function () { doRemove('snake'); }, 20200);
+
+  /* 23–25s：总结语 */
+  demoTimer(function () { summaryEl.classList.add('show'); }, 23000);
+  demoTimer(function () { stopDemo(); }, 25000);
+}
+
+function stopDemo() {
+  if (!DEMO.on) return;
+  DEMO.timers.forEach(clearTimeout);
+  DEMO.timers.length = 0;
+  DEMO.on = false;
+  document.body.classList.remove('demo-mode');
+  summaryEl.classList.remove('show');
+  /* 还原 */
+  stopTour();
+  if (SC.B) { clearChain(true); SC.B.chainCount = 0; }
+  if (SC.C) restoreAll();
+  clearHighlight('A'); clearHighlight('B'); clearHighlight('C');
+  goScene('A', true);
+  capsule('已退出演示模式', '', 2000);
+}
+
+/* ==================================================================
+   16. 事件绑定
+   ================================================================== */
+document.querySelectorAll('.tab').forEach(function (t) {
+  t.addEventListener('click', function (e) {
+    e.stopPropagation();
+    goScene(t.dataset.scene);
+  });
+});
+$('btnDemo').addEventListener('click', function (e) {
+  e.stopPropagation();
+  if (DEMO.on) stopDemo(); else startDemo();
+});
+
+/* --- 场景 A --- */
+$('btnTour').addEventListener('click', function (e) { e.stopPropagation(); runTour(); });
+$('btnSpin').addEventListener('click', function (e) {
+  e.stopPropagation();
+  autoSpin = !autoSpin;
+  $('btnSpin').textContent = autoSpin ? '⏸ 停止旋转' : '🔄 自动旋转';
+});
+$('btnReset').addEventListener('click', function (e) {
+  e.stopPropagation();
+  const h = HOME[currentScene];
+  flyTo(V3(h.pos), V3(h.tgt), 0.5);
+  capsule('视角已复位', '', 1400);
+});
+
+/* --- 场景 B --- */
+$('btnDemoChain').addEventListener('click', function (e) {
+  e.stopPropagation();
+  if (chainBusy) return;
+  const i = Math.floor(Math.random() * CHAINS.length);
+  demoChain(CHAINS[i]);
+});
+$('btnUndo').addEventListener('click', function (e) { e.stopPropagation(); undoChain(); });
+$('btnFinishChain').addEventListener('click', function (e) { e.stopPropagation(); finishChain(); });
+$('btnClearChain').addEventListener('click', function (e) { e.stopPropagation(); clearChain(); });
+
+/* --- 场景 C --- */
+$('btnWeb').addEventListener('click', function (e) { e.stopPropagation(); showWeb(); });
+$('btnEnergy').addEventListener('click', function (e) { e.stopPropagation(); runEnergy(); });
+$('btnRemove').addEventListener('click', function (e) { e.stopPropagation(); toggleRemove(); });
+$('btnRestore').addEventListener('click', function (e) { e.stopPropagation(); restoreAll(); });
+
+/* --- 随堂练习 --- */
+$('btnQuizA').addEventListener('click', function (e) { e.stopPropagation(); openQuiz('A'); });
+$('btnQuizB').addEventListener('click', function (e) { e.stopPropagation(); openQuiz('B'); });
+$('btnQuizC').addEventListener('click', function (e) { e.stopPropagation(); openQuiz('C'); });
+
+/* --- 双击复位视角（全场景） --- */
+renderer.domElement.addEventListener('dblclick', function () {
+  if (isDemo()) return;
+  const h = HOME[currentScene];
+  flyTo(V3(h.pos), V3(h.tgt), 0.5);
+  capsule('视角已复位', '', 1400);
+});
+
+/* --- 演示模式：点击任意处退出 --- */
+window.addEventListener('click', function () {
+  if (DEMO.on) stopDemo();
+}, false);
+
+/* --- 射线拾取 --- */
+const ray = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+function pickAt(cx, cy) {
+  const obj = SC[currentScene]; if (!obj) return null;
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.x = ((cx - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((cy - rect.top) / rect.height) * 2 + 1;
+  ray.setFromCamera(mouse, camera);
+  const hits = ray.intersectObjects(obj.picks, false);
+  for (let i = 0; i < hits.length; i++) {
+    const id = hits[i].object.userData.orgId;
+    if (!id) continue;
+    if (obj.removed[id]) continue;
+    return id;
+  }
+  return null;
+}
+let downXY = null;
+renderer.domElement.addEventListener('pointerdown', function (e) { downXY = [e.clientX, e.clientY]; });
+renderer.domElement.addEventListener('pointerup', function (e) {
+  if (!downXY) return;
+  const moved = Math.abs(e.clientX - downXY[0]) + Math.abs(e.clientY - downXY[1]);
+  downXY = null;
+  if (moved > 6) return;            /* 拖动过就不算点击 */
+  if (isDemo()) return;
+  const id = pickAt(e.clientX, e.clientY);
+  if (id) onOrgClick(currentScene, id);
+});
+renderer.domElement.addEventListener('pointermove', function (e) {
+  if (isDemo()) { renderer.domElement.style.cursor = 'default'; return; }
+  renderer.domElement.style.cursor = pickAt(e.clientX, e.clientY) ? 'pointer' : 'grab';
+});
+
+/* --- 窗口尺寸 --- */
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resize);
+
+/* ==================================================================
+   17. 主循环
+   ================================================================== */
+const clock = new THREE.Clock();
+let elapsed = 0;
+
+function updateEdges(obj, dt) {
+  for (let i = obj.edges.length - 1; i >= 0; i--) {
+    const e = obj.edges[i];
+    /* 断链淡出 */
+    if (e.broken) {
+      e.breakT += dt;
+      const k = Math.min(1, e.breakT / 0.8);
+      e.tubeMat.opacity = 0.85 * (1 - k);
+      e.headMat.opacity = 0.9 * (1 - k);
+      e.parts.forEach(function (p) { p.visible = false; });
+      if (k >= 1) { removeEdge(obj, e); }
+      continue;
+    }
+    /* 粒子沿曲线流动（能量流动） */
+    const on = e.chainEdge || obj.energyOn;
+    e.parts.forEach(function (p) {
+      if (!on) { p.visible = false; return; }
+      p.visible = true;
+      p.userData.t += dt * p.userData.sp;
+      if (p.userData.t > 1) p.userData.t -= 1;
+      const pt = e.curve.getPointAt(p.userData.t);
+      p.position.copy(pt);
+      const s = 0.055 + 0.02 * Math.sin(p.userData.t * Math.PI);
+      p.scale.setScalar(s);
+    });
+  }
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  elapsed += dt;
+
+  /* 相机补间 */
+  if (camTween) {
+    camTween.t += dt;
+    const k = clamp(camTween.t / camTween.d, 0, 1);
+    const e = easeInOut(k);
+    camera.position.lerpVectors(camTween.p0, camTween.p1, e);
+    controls.target.lerpVectors(camTween.t0, camTween.t1, e);
+    if (k >= 1) camTween = null;
+  }
+  if (autoSpin && !camTween && !isDemo()) {
+    const r = Math.sqrt(Math.pow(camera.position.x - controls.target.x, 2) +
+                        Math.pow(camera.position.z - controls.target.z, 2));
+    const a = Math.atan2(camera.position.z - controls.target.z,
+                         camera.position.x - controls.target.x) + dt * 0.16;
+    camera.position.x = controls.target.x + Math.cos(a) * r;
+    camera.position.z = controls.target.z + Math.sin(a) * r;
+  }
+  controls.update();
+
+  /* 当前场景的动态 */
+  const obj = SC[currentScene];
+  if (obj) {
+    obj.orgList.forEach(function (org) {
+      /* 呼吸式浮动 */
+      if (!org.dead) {
+        org.group.position.y = org.baseY + Math.sin(elapsed * 1.15 + org.phase) * 0.055;
+      }
+      /* 鹰扇翅膀 */
+      if (org.wings && !org.dead) {
+        const f = Math.sin(elapsed * 2.6 + org.phase);
+        org.wings[0].rotation.z = 0.14 + f * 0.32;
+        org.wings[1].rotation.z = -0.14 - f * 0.32;
+      }
+      /* 点击错误时抖动 */
+      if (org.shake > 0) {
+        org.shake -= dt;
+        org.group.position.x = org.def.pos[0] + Math.sin(elapsed * 60) * 0.09 * Math.max(0, org.shake);
+        if (org.shake <= 0) org.group.position.x = org.def.pos[0];
+      }
+      /* 移除动画：缩小消失 */
+      if (org.dead) {
+        org.killT = (org.killT || 0) + dt;
+        const k = clamp(org.killT / 0.55, 0, 1);
+        org.group.scale.setScalar(1 - k);
+        if (k >= 1) org.group.visible = false;
+      }
+    });
+
+    /* 高亮脉冲 */
+    Object.keys(obj.hl).forEach(function (id) {
+      const org = obj.orgs[id];
+      if (!org) return;
+      const v = 0.34 + 0.30 * Math.sin(elapsed * 4.2);
+      org.mats.forEach(function (x) { if (x.m.emissive) x.m.emissiveIntensity = v; });
+    });
+
+    updateEdges(obj, dt);
+    if (obj.mixer) obj.mixer.update(dt);
+  }
+
+  renderer.render(obj ? obj.scene : SC.A.scene, camera);
+  updateTags();
+}
+
+/* ==================================================================
+   18. 启动
+   ================================================================== */
+SC.A = buildCommunity('A');
+SC.B = buildCommunity('B');
+SC.C = buildCommunity('C');
+resize();
+updateLegend();
+updateProgress();
+
+/* 读取 URL 参数（便于录屏时直达任意状态） */
+const QS = new URLSearchParams(location.search);
+const qp = function (k) { return QS.get(k); };
+
+let startScene = 'A';
+if (qp('scene')) startScene = qp('scene').toUpperCase();
+if (startScene === 'B') UNLOCKED.B = true;
+if (startScene === 'C') { UNLOCKED.B = true; UNLOCKED.C = true; }
+if (qp('force') === '1') { UNLOCKED.B = true; UNLOCKED.C = true; }
+['B', 'C'].forEach(function (k) {
+  if (UNLOCKED[k]) {
+    const t = document.querySelector('.tab[data-scene="' + k + '"]');
+    if (t) { t.classList.remove('locked'); t.textContent = (k === 'B' ? 'B 连食物链' : 'C 食物网与能量'); }
+  }
+});
+
+goScene(startScene, true);
+animate();
+$('boot').style.display = 'none';
+console.log('%c[课件] 食物链与食物网 · 初始化完成，three.js r' + THREE.REVISION, 'color:#4fd1c5');
+
+/* --- 深链接 --- */
+setTimeout(function () {
+  if (qp('demo') === '1') { startDemo(); return; }
+  if (qp('tour') === '1') runTour();
+  if (qp('chain') === '1') demoChain(CHAINS[0]);
+  if (qp('prechain') === '1') {
+    var arr = (qp('prechain') === '1') ? (qp('which') ? qp('which').split(',') : CHAINS[1]) : [];
+    arr.forEach(function (id) { chainPick(id); });
+  }
+  if (qp('web') === '1') showWeb();
+  if (qp('energy') === '1') runEnergy();
+  if (qp('remove')) { removeMode = true; doRemove(qp('remove')); }
+  if (qp('quiz')) openQuiz(qp('quiz').toUpperCase());
+}, 700);
+
+} /* end startApp */
+
+/* 引导回调：bootstrap 加载完 three 后调用 */
+window.__READY = function (THREE) {
+  try { startApp(THREE); }
+  catch (err) {
+    console.error(err);
+    var b = document.getElementById('boot');
+    b.querySelector('.ring').style.display = 'none';
+    b.querySelector('.t').textContent = '课件启动失败';
+    var e = document.getElementById('bootErr');
+    e.style.display = 'block';
+    e.textContent = '错误信息：' + (err && err.message ? err.message : err);
+  }
+};
+</script>
+
+<!-- =====================================================================
+     引导层：本地离线包优先 → CDN importmap 回退 → 8 秒看门狗
+     ===================================================================== -->
+<script>
+(function () {
+  var finished = false;
+  function showOffline() {
+    if (finished) return;
+    finished = true;
+    var b = document.getElementById('boot');
+    b.querySelector('.ring').style.display = 'none';
+    b.querySelector('.t').textContent = '无法加载 3D 引擎';
+    var e = document.getElementById('bootErr');
+    e.style.display = 'block';
+    e.innerHTML = '本课件需要 three.js。请确认 <code>libs/three.bundle.js</code> 与 HTML 放在同一目录，'
+      + '或者连接网络后刷新（会自动从 CDN 获取）。<br>建议双击 <code>启动本地服务器.bat</code> 后访问 http://127.0.0.1:8000 。';
+  }
+  var wd = setTimeout(showOffline, 8000);
+
+  function ready(T) {
+    if (finished) return;
+    if (!T || !T.Scene) { loadCDN(); return; }
+    finished = true; clearTimeout(wd);
+    window.THREE = T;
+    window.__READY(T);
+  }
+
+  /* 路径 1：本地离线包（经典脚本，file:// 下可用） */
+  function loadLocal() {
+    var s = document.createElement('script');
+    s.src = '../assets/three.bundle.js';
+    s.onload = function () { ready(window.THREE); };
+    s.onerror = loadCDN;
+    document.head.appendChild(s);
+  }
+  /* 路径 2：CDN（ES Module + importmap） */
+  function loadCDN() {
+    var s = document.createElement('script');
+    s.type = 'module';
+    s.textContent = [
+      "import * as T from 'three';",
+      "import { OrbitControls } from 'three/addons/controls/OrbitControls.js';",
+      "import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';",
+      "window.THREE = Object.assign({}, T, { OrbitControls: OrbitControls, GLTFLoader: GLTFLoader });",
+      "window.__READY(window.THREE);"
+    ].join('\n');
+    s.onerror = showOffline;
+    document.head.appendChild(s);
+  }
+  loadLocal();
+})();
+</script>
+
+</body>
+</html>
