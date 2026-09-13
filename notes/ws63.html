@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ws63 智能环境检测站 · 踩坑记录</title>
+<meta name="description" content="ws63 芯片上的嵌入式实践：TM1637 数码管与 8x8 点阵分时复用一条 I2C 总线、DHT11 单总线时序、微秒级延时、光控滞回。">
+<link rel="icon" href="../assets/avatar.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c0:#0d0221; --c1:#1b1035; --c2:#261447; --c3:#ff6ac2; --c4:#2de2e6;
+    --c5:#f9c80e; --c6:#fff1e8; --c7:#9d94c4; --c8:#ff004d; --c9:#29adff; --ca:#00e756;
+    --px:3px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  body {
+    background: var(--c0); color: var(--c6);
+    font-family: "VT323", "Courier New", ui-monospace, "Microsoft YaHei", "PingFang SC", monospace;
+    font-size: 20px; line-height: 1.6;
+  }
+  canvas, img { image-rendering: pixelated; image-rendering: crisp-edges; }
+  #wash { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: .5; }
+  .wrap { position: relative; z-index: 1; }
+  section { max-width: 880px; margin: 0 auto; padding: 0 20px; }
+
+  /* ---------- 顶栏 ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--c0); border-bottom: var(--px) solid var(--c2);
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    padding: 10px 20px; font-size: 17px; color: var(--c7);
+  }
+  .topbar .dot { width: 10px; height: 10px; background: var(--ca); display: inline-block; }
+  .topbar .name { color: var(--c6); font-family: "Press Start 2P", monospace; font-size: 11px; }
+  .topbar .sp { flex: 1; }
+  .topbar a { color: var(--c7); text-decoration: none; border-bottom: 2px solid transparent; }
+  .topbar a:hover { color: var(--c4); border-color: var(--c4); }
+
+  /* ---------- 头部 ---------- */
+  header { max-width: 880px; margin: 0 auto; padding: 54px 20px 30px; }
+  .kicker {
+    display: inline-block; font-family: "Press Start 2P", monospace; font-size: 9px;
+    color: var(--c0); background: var(--c5); padding: 7px 10px; margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  h1 {
+    font-family: "Press Start 2P", monospace;
+    font-size: clamp(19px, 4.6vw, 30px); line-height: 1.5; color: var(--c4);
+    margin-bottom: 16px; letter-spacing: -.5px;
+  }
+  .lede { font-size: 21px; color: var(--c7); max-width: 700px; }
+  .lede b { color: var(--c6); font-weight: normal; }
+  .hr { height: var(--px); background: var(--c2); margin: 34px 0; }
+
+  /* ---------- 规格条 ---------- */
+  .specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 2px; background: var(--c2); border: var(--px) solid var(--c2); }
+  .spec { background: var(--c1); padding: 16px 16px 14px; }
+  .spec .k { font-size: 15px; color: var(--c7); letter-spacing: .5px; }
+  .spec .v { font-family: "Press Start 2P", monospace; font-size: 12px; color: var(--c3); margin-top: 8px; line-height: 1.7; }
+  .spec .v.b { color: var(--c4); }
+  .spec .v.y { color: var(--c5); }
+  .spec .v.g { color: var(--ca); }
+
+  /* ---------- 区块标题 ---------- */
+  h2 {
+    font-family: "VT323", "Microsoft YaHei", "PingFang SC", monospace;
+    font-size: 26px; color: var(--c6);
+    margin: 0 0 22px; line-height: 1.45;
+  }
+  h2 .num { font-family: "Press Start 2P", monospace; font-size: 13px; color: var(--c3); margin-right: 12px; }
+  section.block { padding-top: 46px; padding-bottom: 8px; }
+
+  /* ---------- 硬件表 ---------- */
+  .hw { border: var(--px) solid var(--c2); }
+  .hw-row { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 13px 16px; background: var(--c1); border-bottom: 2px solid var(--c2); align-items: baseline; }
+  .hw-row:last-child { border-bottom: 0; }
+  .hw-row .part { flex: 0 0 210px; color: var(--c6); }
+  .hw-row .pin { color: var(--c4); font-size: 18px; }
+  .hw-row .why { color: var(--c7); font-size: 18px; flex: 1 1 240px; }
+  @media (max-width: 620px) { .hw-row .part { flex-basis: 100%; } }
+
+  /* ---------- 坑卡片 ---------- */
+  .pit {
+    border: var(--px) solid var(--c2); background: var(--c1);
+    margin-bottom: 22px; position: relative;
+  }
+  .pit-head { display: flex; gap: 14px; align-items: flex-start; padding: 18px 20px 0; }
+  .pit-no {
+    flex: 0 0 auto; font-family: "Press Start 2P", monospace; font-size: 11px;
+    background: var(--c3); color: var(--c0); padding: 9px 10px; line-height: 1;
+  }
+  .pit-title { font-size: 22px; color: var(--c5); line-height: 1.4; padding-top: 3px; }
+  .pit-body { padding: 12px 20px 20px; }
+  .pit-body p { margin-bottom: 12px; color: var(--c7); }
+  .pit-body p:last-child { margin-bottom: 0; }
+  .pit-body strong { color: var(--c6); font-weight: normal; }
+  .tagon { display: inline-block; font-size: 14px; padding: 2px 8px; margin-right: 8px; vertical-align: 2px; }
+  .t-sym { background: var(--c8); color: #fff; }
+  .t-why { background: var(--c9); color: var(--c0); }
+  .t-fix { background: var(--ca); color: var(--c0); }
+
+  pre {
+    background: var(--c0); border-left: var(--px) solid var(--c4);
+    padding: 15px 17px; margin: 14px 0 4px; overflow-x: auto;
+    font-family: "Courier New", ui-monospace, monospace;
+    font-size: 15px; line-height: 1.62; color: #cfe9e6;
+  }
+  pre .cm { color: #6f6a97; }
+  pre .kw { color: var(--c3); }
+  pre .nm { color: var(--c5); }
+  pre .st { color: #8be89a; }
+
+  /* ---------- API 映射表 ---------- */
+  .api { border: var(--px) solid var(--c2); }
+  .api-row { display: grid; grid-template-columns: 1fr 1.35fr; background: var(--c1); border-bottom: 2px solid var(--c2); }
+  .api-row:last-child { border-bottom: 0; }
+  .api-row.head { background: var(--c2); font-family: "Press Start 2P", monospace; font-size: 9px; }
+  .api-row.head div { color: var(--c5); padding: 13px 16px; }
+  .api-row div { padding: 11px 16px; font-size: 18px; }
+  .api-row div:first-child { color: var(--c7); border-right: 2px solid var(--c2); }
+  .api-row div:last-child { color: var(--c4); }
+  @media (max-width: 560px) {
+    .api-row { grid-template-columns: 1fr; }
+    .api-row div:first-child { border-right: 0; border-bottom: 2px solid var(--c2); padding-bottom: 4px; }
+    .api-row div:last-child { padding-top: 4px; }
+  }
+
+  /* ---------- 尾 ---------- */
+  footer { max-width: 880px; margin: 0 auto; padding: 50px 20px 70px; color: var(--c7); font-size: 18px; }
+  footer a { color: var(--c4); text-decoration: none; border-bottom: 2px solid var(--c2); }
+  footer a:hover { border-color: var(--c4); }
+  .back {
+    display: inline-block; margin-top: 22px; font-family: "Press Start 2P", monospace; font-size: 10px;
+    background: var(--c2); color: var(--c4); padding: 13px 16px; text-decoration: none;
+    border: var(--px) solid var(--c4);
+  }
+  .back:hover { background: var(--c4); color: var(--c0); }
+</style>
+</head>
+<body>
+<canvas id="wash" aria-hidden="true"></canvas>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="dot"></span>
+    <span class="name">青山</span>
+    <span>·</span>
+    <span>ws63 / 嵌入式</span>
+    <span class="sp"></span>
+    <a href="../">主页</a>
+    <a href="../arcade/">玩具屋</a>
+    <a href="https://github.com/zyzyzy747" target="_blank" rel="noopener">GitHub</a>
+  </div>
+
+  <header>
+    <span class="kicker">SOUTHBOUND DEV · COURSE PROJECT</span>
+    <h1>ws63 智能环境检测站</h1>
+    <p class="lede">
+      南向设备开发课程项目。一个 22 KB 的单文件 C 程序，在 ws63 芯片上把
+      <b>TM1637 四位数码管</b>、<b>DHT11 温湿度</b>、<b>光敏 ADC</b> 和
+      <b>8×8 点阵</b>跑起来。<br>
+      下面这七条是真正踩过的坑——不是教程里抄的，是编译报错和示波器前熬出来的。
+    </p>
+  </header>
+
+  <section>
+    <div class="specs">
+      <div class="spec"><div class="k">芯片</div><div class="v b">ws63</div></div>
+      <div class="spec"><div class="k">系统</div><div class="v">OpenHarmony</div></div>
+      <div class="spec"><div class="k">语言</div><div class="v">C</div></div>
+      <div class="spec"><div class="k">代码量</div><div class="v g">827 行 / 1 文件</div></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2><span class="num">01</span>硬件怎么接的</h2>
+    <div class="hw">
+      <div class="hw-row">
+        <span class="part">TM1637 数码管</span>
+        <span class="pin">SDA=GPIO13 · SCL=GPIO14</span>
+        <span class="why">显示温度 / 湿度 / 光照</span>
+      </div>
+      <div class="hw-row">
+        <span class="part">PCA9535 扩展器</span>
+        <span class="pin">同一组 SDA/SCL · 地址 0x27</span>
+        <span class="why">驱动 8×8 点阵，输出状态图标</span>
+      </div>
+      <div class="hw-row">
+        <span class="part">总线选择器</span>
+        <span class="pin">PIN9 = GPIO09</span>
+        <span class="why">高电平给数码管，低电平给点阵</span>
+      </div>
+      <div class="hw-row">
+        <span class="part">DHT11 温湿度</span>
+        <span class="pin">GPIO03</span>
+        <span class="why">单总线，靠脉宽编码</span>
+      </div>
+      <div class="hw-row">
+        <span class="part">光敏传感器</span>
+        <span class="pin">ADC 通道 0</span>
+        <span class="why">读数单位 mV，用于光控照明</span>
+      </div>
+      <div class="hw-row">
+        <span class="part">按键 / LED</span>
+        <span class="pin">KEY=GPIO00 · 报警=GPIO05 · 照明=GPIO06</span>
+        <span class="why">切显示模式 / 超阈值闪烁 / 光控开关</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2><span class="num">02</span>七条踩坑记录</h2>
+
+    <div class="pit">
+      <div class="pit-head">
+        <span class="pit-no">01</span>
+        <span class="pit-title">TM1637 根本不是标准 I2C</span>
+      </div>
+      <div class="pit-body">
+        <p><span class="tagon t-sym">现象</span>拿标准 I2C 库去驱动 TM1637，时序全对、地址也对，数码管一个字都不亮。</p>
+        <p><span class="tagon t-why">根因</span>TM1637 只是"长得像 I2C"：它有起始/停止条件，但每个字节是<strong>从最低位开始传的（LSB first）</strong>，而标准 I2C 是最高位优先（MSB first）。顺序反了，从设备收到的就是整字节位镜像的垃圾数据。</p>
+        <p><span class="tagon t-fix">解法</span>老老实实写两套位操作函数——一套给标准 I2C 的 PCA9535，一套给 TM1637，两者只差判断位和移位方向那一行。ACK 检测也必须做：发完 8 位要把 SDA 切成输入去读应答，读完再切回输出。</p>
+<pre><span class="cm">/* 标准 I2C：MSB 优先（给 PCA9535） */</span>
+<span class="kw">if</span> (data &amp; <span class="nm">0x80</span>) SDA_HIGH(); <span class="kw">else</span> SDA_LOW();
+data &lt;&lt;= <span class="nm">1</span>;
+
+<span class="cm">/* TM1637：LSB 优先，只有这两行不一样 */</span>
+<span class="kw">if</span> (data &amp; <span class="nm">0x01</span>) SDA_HIGH(); <span class="kw">else</span> SDA_LOW();
+data &gt;&gt;= <span class="nm">1</span>;
+
+<span class="cm">/* 读 ACK：SDA 必须先切输入，否则主从对着拉电平 */</span>
+uapi_gpio_set_dir(I2C_SDA, GPIO_DIRECTION_INPUT);
+uapi_gpio_set_dir(I2C_SDA, GPIO_DIRECTION_OUTPUT);</pre>
+      </div>
+    </div>
+
+    <div class="pit">
+      <div class="pit-head">
+        <span class="pit-no">02</span>
+        <span class="pit-title">两个从设备挤一条总线，得靠片选分时复用</span>
+      </div>
+      <div class="pit-body">
+        <p><span class="tagon t-sym">现象</span>数码管一刷新，8×8 点阵就停在那儿不动了；点阵一扫，数码管又开始闪。</p>
+        <p><span class="t-why">根因</span>板子上 <strong>TM1637 和 PCA9535 共用同一组 SDA/SCL 引脚</strong>。它们是两个独立器件，同时挂在一条总线上会互相抢线，谁都收不到正确数据。</p>
+        <p><span class="t-fix">解法</span>用 GPIO09 当片选：写数码管前拉高，把总线交给它；写完拉低，还给点阵继续扫描。代价是每次刷新显示都要"切过去—写完—切回来"，所以主循环里的点阵扫描必须足够快，不然切回来的瞬间会看到一行残影。</p>
+<pre><span class="kw">static void</span> <span class="nm">tm1637_display_raw</span>(<span class="kw">uint8_t</span> d1, <span class="kw">uint8_t</span> d2, <span class="kw">uint8_t</span> d3, <span class="kw">uint8_t</span> d4, <span class="kw">uint8_t</span> dot)
+{
+    <span class="nm">selector_tm1637</span>();      <span class="cm">/* PIN9 = HIGH，总线交给数码管 */</span>
+
+    <span class="nm">i2c_start</span>();
+    <span class="nm">i2c_write_byte_lsb</span>(<span class="nm">0x40</span>);   <span class="cm">/* 自动地址累加 */</span>
+    <span class="nm">i2c_stop</span>();
+
+    <span class="nm">i2c_start</span>();
+    <span class="nm">i2c_write_byte_lsb</span>(<span class="nm">0xC0</span>);   <span class="cm">/* 从第 1 位开始写 */</span>
+    <span class="cm">/* ... 写 4 个段码 ... */</span>
+    <span class="nm">i2c_stop</span>();
+
+    <span class="nm">selector_matrix</span>();      <span class="cm">/* PIN9 = LOW，还给点阵 */</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="pit">
+      <div class="pit-head">
+        <span class="pit-no">03</span>
+        <span class="pit-title">DHT11 没有时钟线，全靠脉宽自己数</span>
+      </div>
+      <div class="pit-body">
+        <p><span class="tagon t-sym">现象</span>读十次能有三四次校验和不通过，数据是乱码。</p>
+        <p><span class="t-why">根因</span>DHT11 是单总线协议：主机拉低 20 ms 起始，然后从设备用<strong>高电平的持续时间</strong>表示 0 和 1——约 26–28 μs 是 0，约 70 μs 是 1。判定点取在 30 μs 处：这时候还是高电平就是 1，已经掉下去就是 0。任何一个中断插进来打乱这几微秒，整个字节就废了。</p>
+        <p><span class="t-fix">解法</span>每个等待循环都带超时计数，超了就立刻返回失败、放弃这一轮，绝不空等。传感器读失败只是显示"--"，不能让整个任务卡死在等电平上。</p>
+<pre><span class="kw">static int</span> <span class="nm">dht11_read_byte</span>(<span class="kw">uint8_t</span> *byte)
+{
+    <span class="kw">uint8_t</span> data = <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="nm">0</span>; i &lt; <span class="nm">8</span>; i++) {
+
+        <span class="kw">uint32_t</span> timeout = <span class="nm">1000</span>;
+        <span class="kw">while</span> (<span class="nm">dht11_pin_read</span>() == <span class="nm">0</span>) {      <span class="cm">/* 等 50μs 低电平结束 */</span>
+            <span class="kw">if</span> (--timeout == <span class="nm">0</span>) <span class="kw">return</span> -<span class="nm">1</span>;      <span class="cm">/* 超时保护，不死等 */</span>
+            <span class="nm">DHT11_DELAY_US</span>(<span class="nm">1</span>);
+        }
+
+        <span class="nm">DHT11_DELAY_US</span>(<span class="nm">30</span>);                  <span class="cm">/* 30μs 采样点：0 和 1 的分界 */</span>
+        data &lt;&lt;= <span class="nm">1</span>;
+        <span class="kw">if</span> (<span class="nm">dht11_pin_read</span>() == <span class="nm">1</span>) data |= <span class="nm">0x01</span>;
+        <span class="cm">/* ... 再等它掉下去 ... */</span>
+    }
+    *byte = data;
+    <span class="kw">return</span> <span class="nm">0</span>;
+}</pre>
+      </div>
+    </div>
+
+    <div class="pit">
+      <div class="pit-head">
+        <span class="pit-no">04</span>
+        <span class="pit-title">SDK 只给毫秒睡眠，微秒延时得自己空转</span>
+      </div>
+      <div class="pit-body">
+        <p><span class="tagon t-sym">现象</span>DHT11 要 30 μs 级精度，但 SDK 里只有 <code>osal_msleep()</code>，最小粒度就是 1 ms——差三个数量级。</p>
+        <p><span class="t-why">根因</span>RTOS 的睡眠会主动让出 CPU 触发任务调度，唤醒时间受调度器影响，压根不可能精确到微秒。这种场合不能用"睡"，只能"忙等"。</p>
+        <p><span class="t-fix">解法</span>用 <code>nop</code> 空转拼出微秒延时。代价是<strong>延时精度绑死主频</strong>——上面那个 ×50 的系数是在当前主频下试出来的，换主频就得重算，否则 DHT11 立刻读不出数据。这是整个项目里最"硬编码"、也最需要注释的一行。</p>
+<pre><span class="kw">static void</span> <span class="nm">delay_us</span>(<span class="kw">uint32_t</span> us)
+{
+    <span class="kw">for</span> (<span class="kw">uint32_t</span> i = <span class="nm">0</span>; i &lt; us * <span class="nm">50</span>; i++) {
+        __asm__ <span class="kw">volatile</span> (<span class="st">"nop"</span>);   <span class="cm">/* 50 次 nop ≈ 1μs，依赖主频 */</span>
+    }
+}</pre>
+      </div>
+    </div>
+
+    <div class="pit">
+      <div class="pit-head">
+        <span class="pit-no">05</span>
+        <span class="pit-title">光控开关在阈值附近疯狂闪烁</span>
+      </div>
+      <div class="pit-body">
+        <p><span class="tagon t-sym">现象</span>环境光刚好停在临界值时，照明灯开始高频开关，肉眼看着像在抽搐。</p>
+        <p><span class="t-why">根因</span>单阈值比较没有"记忆"：读数一旦在阈值上下抖动，条件就反复成立、反复翻转。真实世界的模拟量在临界点附近必然是抖的，这是必然事件不是偶然。</p>
+        <p><span class="t-fix">解法</span>加<strong>滞回带</strong>——开灯阈值定在 500 mV，关灯阈值定在 800 mV，中间留 300 mV 的死区。灯一亮就要等环境明显变亮才关，反之亦然，抖动被这 300 mV 吃掉了。</p>
+<pre><span class="cm">/* 开和关用两个不同的阈值，中间那条缝就是滞回带 */</span>
+<span class="kw">#define</span> LIGHT_THRESHOLD_ON   <span class="nm">500</span>   <span class="cm">/* 低于此值：开灯 */</span>
+<span class="kw">#define</span> LIGHT_THRESHOLD_OFF  <span class="nm">800</span>   <span class="cm">/* 高于此值：关灯 */</span>
+
+<span class="kw">if</span> (g_light_on) {
+    <span class="kw">if</span> (g_light_mv &gt; LIGHT_THRESHOLD_OFF) <span class="nm">led_light_set</span>(<span class="kw">false</span>);
+} <span class="kw">else</span> {
+    <span class="kw">if</span> (g_light_mv &lt; LIGHT_THRESHOLD_ON)  <span class="nm">led_light_set</span>(<span class="kw">true</span>);
+}</pre>
+      </div>
+    </div>
+
+    <div class="pit">
+      <div class="pit-head">
+        <span class="pit-no">06</span>
+        <span class="pit-title">数码管想显示字母，段码得自己拼</span>
+      </div>
+      <div class="pit-body">
+        <p><span class="tagon t-sym">现象</span>温度显示想带单位 "°C"、湿度带 "%RH"、光照带 "LUX"，但段码表里只有 0–9 十个数字。</p>
+        <p><span class="t-why">根因</span>七段数码管只有 a–g 七根笔画，标准段码表只覆盖数字。字母必须手工挑出"哪几段亮起来最像这个字母"，没有现成表可查。</p>
+        <p><span class="t-fix">解法</span>按笔画位置反推。C 是 a、d、e、f 四段（缺右上那段竖）→ 0x39；H 是 b、c、e、f、g → 0x76；L 是 d、e、f → 0x38。拼错一位，显示出来就是另一个字母，只能一个个试。</p>
+<pre><span class="cm">/* 0-9 是标准共阴极段码 */</span>
+<span class="kw">static const uint8_t</span> seg_table[] = {
+    <span class="nm">0x3F</span>, <span class="nm">0x06</span>, <span class="nm">0x5B</span>, <span class="nm">0x4F</span>, <span class="nm">0x66</span>, <span class="nm">0x6D</span>, <span class="nm">0x7D</span>, <span class="nm">0x07</span>, <span class="nm">0x7F</span>, <span class="nm">0x6F</span>,
+    <span class="nm">0x00</span>, <span class="nm">0x40</span>   <span class="cm">/* 空格、横杠（传感器失败时显示 --） */</span>
+};
+
+<span class="cm">/* 单位符号：按笔画位置手工拼出来的 */</span>
+<span class="kw">#define</span> SEG_UNIT_C  <span class="nm">0x39</span>   <span class="cm">/* a d e f      → C */</span>
+<span class="kw">#define</span> SEG_UNIT_H  <span class="nm">0x76</span>   <span class="cm">/* b c e f g    → H */</span>
+<span class="kw">#define</span> SEG_UNIT_L  <span class="nm">0x38</span>   <span class="cm">/* d e f        → L */</span></pre>
+      </div>
+    </div>
+
+    <div class="pit">
+      <div class="pit-head">
+        <span class="pit-no">07</span>
+        <span class="pit-title">看门狗是"喂"的，不是"重置"的</span>
+      </div>
+      <div class="pit-body">
+        <p><span class="tagon t-sym">现象</span>程序跑着跑着整机重启，日志从开机横幅开始重新打印。</p>
+        <p><span class="t-why">根因</span>主循环里点阵扫描是纯耗时操作，一旦某次循环超过看门狗的超时窗口，芯片就认为程序跑飞了，直接硬复位。</p>
+        <p><span class="t-fix">解法</span>在循环里定期"喂狗"。SDK 没有单独的 feed 接口，实际做法是 <strong>disable + enable 组合</strong>——重新使能等于把计数器清零。放在每 100 帧点阵扫描之后，既不会太频繁浪费 CPU，也不会漏掉。</p>
+<pre><span class="kw">static void</span> <span class="nm">feed_watchdog</span>(<span class="kw">void</span>)
+{
+    <span class="nm">uapi_watchdog_disable</span>();
+    <span class="nm">uapi_watchdog_enable</span>(<span class="nm">0</span>);   <span class="cm">/* 重新使能 = 计数器归零 */</span>
+}
+
+<span class="cm">/* 主循环里：攒够 100 帧点阵扫描就喂一次 */</span>
+frame_count++;
+<span class="kw">if</span> (frame_count &gt;= <span class="nm">100</span>) {
+    frame_count = <span class="nm">0</span>;
+    <span class="nm">feed_watchdog</span>();
+}</pre>
+      </div>
+    </div>
+
+  </section>
+
+  <section class="block">
+    <h2><span class="num">03</span>SDK 的 API 映射</h2>
+    <p style="color:var(--c7); margin-bottom:18px;">
+      ws63 跑的是 OpenHarmony 轻量系统，命名和 Linux / POSIX 那套完全对不上。照着 Linux 写，一个都编不过。
+    </p>
+    <div class="api">
+      <div class="api-row head"><div>通用写法</div><div>ws63 SDK</div></div>
+      <div class="api-row"><div>printf( )</div><div>osal_printk( )</div></div>
+      <div class="api-row"><div>sleep( ) / usleep( )</div><div>osal_msleep( ) &nbsp;← 只有毫秒</div></div>
+      <div class="api-row"><div>pthread_create( )</div><div>osal_kthread_create( )</div></div>
+      <div class="api-row"><div>int main( )</div><div>app_run( entry )</div></div>
+      <div class="api-row"><div>millis( )</div><div>osal_get_jiffies( ) × 10</div></div>
+      <div class="api-row"><div>digitalWrite( )</div><div>uapi_gpio_set_val( )</div></div>
+      <div class="api-row"><div>pinMode( )</div><div>uapi_gpio_set_dir( ) / uapi_pin_set_mode( )</div></div>
+      <div class="api-row"><div>analogRead( )</div><div>uapi_adc_manual_sample( )</div></div>
+      <div class="api-row"><div>delay( ) 喂狗</div><div>uapi_watchdog_disable( ) + enable( )</div></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <h2><span class="num">04</span>线程模型</h2>
+    <div class="pit">
+      <div class="pit-body" style="padding-top:20px;">
+        <p>整个程序是一个<strong>单任务大循环</strong>，不是多线程。入口 <code>app_run()</code> 创建唯一一个任务，之后所有事情——点阵扫描、传感器采样、显示刷新、按键、喂狗——都按各自的时间片在这个循环里轮转。</p>
+        <p>时间基准统一用 <code>osal_get_jiffies() × 10</code> 换算成毫秒，然后各自比较"距上次执行过了多久"，而不是用阻塞式睡眠。这样任何一个环节慢了，也不会连累其它环节的节奏。</p>
+<pre><span class="kw">while</span> (<span class="nm">1</span>) {
+    <span class="nm">matrix_scan_frame</span>();                        <span class="cm">/* 每轮都扫，保证点阵不闪 */</span>
+
+    <span class="kw">if</span> ((now - sensor_tick) &gt;= <span class="nm">2000</span>) {        <span class="cm">/* 传感器：2s 一次 */</span>
+        <span class="nm">sensor_sample</span>();
+        <span class="nm">check_alarm</span>();
+        <span class="nm">light_control</span>();
+    }
+    <span class="kw">if</span> ((now - disp_tick) &gt;= <span class="nm">200</span>) {           <span class="cm">/* 数码管：200ms 一次 */</span>
+        <span class="nm">update_display</span>();
+    }
+    <span class="nm">alarm_led_update</span>();                         <span class="cm">/* 报警灯闪烁 */</span>
+    <span class="nm">process_key</span>();                               <span class="cm">/* 按键消抖 */</span>
+}</pre>
+        <p style="margin-top:14px;">任务句柄创建完立刻 <code>osal_kfree()</code> 释放——任务本身继续在跑，只是不再持有这个句柄，省下一份内存。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="hr" style="margin-top:0;"></div>
+    源码与课程作业相关文件未公开。技术问题欢迎邮件交流：
+    <a href="mailto:3293914965@qq.com">3293914965@qq.com</a>
+    <br><br>
+    <a class="back" href="../">◂ 返回主页</a>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var cv = document.getElementById('wash');
+  if (!cv) return;
+  var ctx = cv.getContext('2d');
+  var BAYER = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+  var W = 0, H = 0, t = 0, raf = null;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function resize() {
+    W = Math.max(1, Math.ceil(window.innerWidth / 6));
+    H = Math.max(1, Math.ceil(window.innerHeight / 6));
+    cv.width = W; cv.height = H;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function draw() {
+    var img = ctx.createImageData(W, H);
+    var d = img.data;
+    for (var y = 0; y < H; y++) {
+      for (var x = 0; x < W; x++) {
+        var i = (y * W + x) * 4;
+        var v = Math.sin(x * 0.16 + t) + Math.sin(y * 0.21 + t * 1.3) + Math.sin((x + y) * 0.09 - t * 0.7);
+        var nv = (v + 3) / 6;
+        var th = (BAYER[y & 3][x & 3] + 0.5) / 16;
+        if (nv > th) {
+          d[i] = 0x26; d[i+1] = 0x14; d[i+2] = 0x47; d[i+3] = 255;
+        } else {
+          d[i] = 0x0d; d[i+1] = 0x02; d[i+2] = 0x21; d[i+3] = 255;
+        }
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+
+  function loop() { t += 0.022; draw(); raf = requestAnimationFrame(loop); }
+
+  draw();
+  if (!reduce) loop();
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { if (raf) { cancelAnimationFrame(raf); raf = null; } }
+    else if (!reduce && !raf) loop();
+  });
+})();
+</script>
+</body>
+</html>
