@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D 互动课件系列</title>
+<meta name="description" content="三套单文件 3D 互动课件：呼吸系统与气体交换、常见化学反应、食物链与食物网。Three.js 渲染，含自动演示与随堂练习，自带引擎离线可跑。">
+<link rel="icon" href="../assets/avatar.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c0:#0d0221; --c1:#1b1035; --c2:#261447; --c3:#ff6ac2; --c4:#2de2e6;
+    --c5:#f9c80e; --c6:#fff1e8; --c7:#9d94c4; --c8:#ff004d; --c9:#29adff; --ca:#00e756;
+    --px:3px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  body {
+    background: var(--c0); color: var(--c6);
+    font-family: "VT323", "Courier New", ui-monospace, "Microsoft YaHei", "PingFang SC", monospace;
+    font-size: 20px; line-height: 1.6;
+  }
+  canvas, img { image-rendering: pixelated; image-rendering: crisp-edges; }
+  #wash { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: .5; }
+  .wrap { position: relative; z-index: 1; }
+  section { max-width: 880px; margin: 0 auto; padding: 0 20px; }
+
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--c0); border-bottom: var(--px) solid var(--c2);
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    padding: 10px 20px; font-size: 17px; color: var(--c7);
+  }
+  .topbar .dot { width: 10px; height: 10px; background: var(--ca); display: inline-block; }
+  .topbar .name { color: var(--c6); font-family: "Press Start 2P", monospace; font-size: 11px; }
+  .topbar .sp { flex: 1; }
+  .topbar a { color: var(--c7); text-decoration: none; border-bottom: 2px solid transparent; }
+  .topbar a:hover { color: var(--c4); border-color: var(--c4); }
+
+  header { max-width: 880px; margin: 0 auto; padding: 54px 20px 30px; }
+  .kicker {
+    display: inline-block; font-family: "Press Start 2P", monospace; font-size: 9px;
+    color: var(--c0); background: var(--ca); padding: 7px 10px; margin-bottom: 20px; line-height: 1.6;
+  }
+  h1 {
+    font-family: "Press Start 2P", monospace;
+    font-size: clamp(18px, 4.4vw, 28px); line-height: 1.5; color: var(--c4);
+    margin-bottom: 16px; letter-spacing: -.5px;
+  }
+  .lede { font-size: 21px; color: var(--c7); max-width: 700px; }
+  .lede b { color: var(--c6); font-weight: normal; }
+
+  .facts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+  .fact { border: 2px solid var(--c2); background: var(--c1); padding: 7px 12px; font-size: 17px; color: var(--c7); }
+  .fact b { color: var(--c5); font-weight: normal; }
+
+  .list { padding-top: 40px; }
+  .cw {
+    display: block; text-decoration: none; color: inherit;
+    border: var(--px) solid var(--c2); background: var(--c1);
+    margin-bottom: 20px; padding: 22px 22px 20px;
+    transition: border-color .12s, transform .12s;
+  }
+  .cw:hover { border-color: var(--c4); }
+  .cw:active { transform: translate(2px, 2px); }
+  .cw-top { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 10px; }
+  .cw-no { font-family: "Press Start 2P", monospace; font-size: 11px; color: var(--c0); background: var(--c5); padding: 8px 10px; line-height: 1; flex: 0 0 auto; }
+  .cw h2 { font-family: "VT323", "Microsoft YaHei", "PingFang SC", monospace; font-size: 25px; color: var(--c4); line-height: 1.4; }
+  .cw p { color: var(--c7); margin-bottom: 14px; }
+  .cw p b { color: var(--c6); font-weight: normal; }
+  .scenes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .scene { font-size: 16px; color: var(--c7); border: 2px solid var(--c2); padding: 4px 10px; }
+  .cw-foot { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .go { font-family: "Press Start 2P", monospace; font-size: 10px; background: var(--c3); color: var(--c0); padding: 11px 14px; }
+  .cw:hover .go { background: var(--c4); }
+  .path { font-size: 16px; color: #6f6a97; }
+
+  .note { border-left: var(--px) solid var(--c5); background: var(--c1); padding: 16px 18px; margin-top: 12px; color: var(--c7); font-size: 19px; }
+  .note b { color: var(--c5); font-weight: normal; }
+
+  footer { max-width: 880px; margin: 0 auto; padding: 44px 20px 70px; color: var(--c7); font-size: 18px; }
+  .back {
+    display: inline-block; font-family: "Press Start 2P", monospace; font-size: 10px;
+    background: var(--c2); color: var(--c4); padding: 13px 16px; text-decoration: none;
+    border: var(--px) solid var(--c4);
+  }
+  .back:hover { background: var(--c4); color: var(--c0); }
+</style>
+</head>
+<body>
+<canvas id="wash" aria-hidden="true"></canvas>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="dot"></span>
+    <span class="name">青山</span>
+    <span>·</span>
+    <span>3D 课件</span>
+    <span class="sp"></span>
+    <a href="../">主页</a>
+    <a href="../notes/ws63.html">ws63 笔记</a>
+    <a href="https://github.com/zyzyzy747" target="_blank" rel="noopener">GitHub</a>
+  </div>
+
+  <header>
+    <span class="kicker">THREE.JS · SINGLE FILE · NO CDN</span>
+    <h1>3D 互动课件系列</h1>
+    <p class="lede">
+      三套面向中学课堂的 3D 互动课件，都是<b>单页应用</b>：打开就能转、能缩放、能点，
+      每个模型挂着自己的知识卡。含<b>自动演示模式</b>和<b>随堂练习</b>。<br>
+      每套自带打包好的 Three.js，<b>不联网也能跑</b>。
+    </p>
+    <div class="facts">
+      <span class="fact">三套合计 <b>3.0 MB</b></span>
+      <span class="fact">零外部依赖 <b>100% 本地</b></span>
+      <span class="fact">不需要 <b>安装 / 构建</b></span>
+    </div>
+  </header>
+
+  <section class="list">
+
+    <a class="cw" href="respiratory/">
+      <div class="cw-top">
+        <span class="cw-no">01</span>
+        <h2>呼吸系统与肺泡气体交换</h2>
+      </div>
+      <p>
+        从鼻腔一路拆到肺泡，把<b>气体交换</b>这件看不见的事画成能转的模型。
+        支持空气路径演示、吸气/呼气运动模拟，以及三类气体（O₂ / CO₂ / 混合）在肺泡处的扩散可视化。
+      </p>
+      <div class="scenes">
+        <span class="scene">呼吸系统结构</span>
+        <span class="scene">呼吸运动</span>
+        <span class="scene">肺泡气体交换</span>
+      </div>
+      <div class="cw-foot">
+        <span class="go">▸ 进去看</span>
+        <span class="path">/courseware/respiratory/</span>
+      </div>
+    </a>
+
+    <a class="cw" href="chemistry/">
+      <div class="cw-top">
+        <span class="cw-no">02</span>
+        <h2>常见化学反应</h2>
+      </div>
+      <p>
+        球棍模型搭出来的分子库：从 O₂、H₂、H₂O 到 CO₂、HCl、CaCO₃，
+        点任意一个分子都能看它的原子组成与化学键类型。另有反应实验台和微观粒子视角。
+      </p>
+      <div class="scenes">
+        <span class="scene">分子结构</span>
+        <span class="scene">反应实验</span>
+        <span class="scene">微观世界</span>
+      </div>
+      <div class="cw-foot">
+        <span class="go">▸ 进去看</span>
+        <span class="path">/courseware/chemistry/</span>
+      </div>
+    </a>
+
+    <a class="cw" href="foodchain/">
+      <div class="cw-top">
+        <span class="cw-no">03</span>
+        <h2>食物链与食物网</h2>
+      </div>
+      <p>
+        一片草地上从草到鹰的完整生态位：生产者、各级消费者、分解者各就各位。
+        可以逐条连食物链，看能量沿营养级怎么流动，也能切到食物网视角看交错关系。
+      </p>
+      <div class="scenes">
+        <span class="scene">群落成员</span>
+        <span class="scene">连食物链</span>
+        <span class="scene">食物网与能量</span>
+      </div>
+      <div class="cw-foot">
+        <span class="go">▸ 进去看</span>
+        <span class="path">/courseware/foodchain/</span>
+      </div>
+    </a>
+
+    <div class="note">
+      <b>关于加载：</b>每套课件都优先读同目录下的本地引擎文件，只有本地文件缺失时才会回退到公共 CDN。
+      所以断网状态下也能正常打开——这也是它们当初按"单个 HTML 双击就能跑"来做交付的原因。
+    </div>
+
+  </section>
+
+  <footer>
+    <a class="back" href="../">◂ 返回主页</a>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var cv = document.getElementById('wash');
+  if (!cv) return;
+  var ctx = cv.getContext('2d');
+  var BAYER = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+  var W = 0, H = 0, t = 0, raf = null;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function resize() {
+    W = Math.max(1, Math.ceil(window.innerWidth / 6));
+    H = Math.max(1, Math.ceil(window.innerHeight / 6));
+    cv.width = W; cv.height = H;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function draw() {
+    var img = ctx.createImageData(W, H);
+    var d = img.data;
+    for (var y = 0; y < H; y++) {
+      for (var x = 0; x < W; x++) {
+        var i = (y * W + x) * 4;
+        var v = Math.sin(x * 0.16 + t) + Math.sin(y * 0.21 + t * 1.3) + Math.sin((x + y) * 0.09 - t * 0.7);
+        var nv = (v + 3) / 6;
+        var th = (BAYER[y & 3][x & 3] + 0.5) / 16;
+        if (nv > th) { d[i] = 0x26; d[i+1] = 0x14; d[i+2] = 0x47; d[i+3] = 255; }
+        else { d[i] = 0x0d; d[i+1] = 0x02; d[i+2] = 0x21; d[i+3] = 255; }
+      }
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+
+  function loop() { t += 0.022; draw(); raf = requestAnimationFrame(loop); }
+  draw();
+  if (!reduce) loop();
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { if (raf) { cancelAnimationFrame(raf); raf = null; } }
+    else if (!reduce && !raf) loop();
+  });
+})();
+</script>
+</body>
+</html>
