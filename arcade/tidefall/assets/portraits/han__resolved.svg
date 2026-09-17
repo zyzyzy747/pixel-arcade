@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 1100" width="760" height="1100">
+<defs>
+  <linearGradient id="g_han_resolved" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#5b5f68"/>
+    <stop offset="60%" stop-color="#373d48"/>
+    <stop offset="100%" stop-color="#1e2127"/>
+  </linearGradient>
+  <radialGradient id="r_han_resolved" cx="0.5" cy="0.28" r="0.75">
+    <stop offset="0%" stop-color="#9aa5b1" stop-opacity="0.20"/>
+    <stop offset="100%" stop-color="#9aa5b1" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<g transform="rotate(0.0 380 700)">
+  <!-- 肩胸 -->
+  <path d="M120,1100 C120,880 236,760 380,760 C524,760 640,880 640,1100 Z" fill="url(#g_han_resolved)"/>
+  <!-- 脖子 -->
+  <rect x="344" y="648" width="72" height="130" rx="30" fill="#2d323b"/>
+  <!-- 头 -->
+  <ellipse cx="380" cy="410" rx="104" ry="126" fill="#313640"/>
+  <!-- 头发 -->
+  <path d="M238,344 C238,226 306,178 380,178 C454,178 522,226 522,344 L528,470 C528,470 496,392 462,376 L462,340 C462,340 428,306 380,306 C332,306 298,340 298,340 L298,376 C264,392 232,470 232,470 Z" fill="#262930"/>
+  <!-- 眉 -->
+  <path d="M300,330.0 q30,-9.2 58,-1.6" stroke="#1a1c21" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M460,330.0 q-30,-9.2 -58,-1.6" stroke="#1a1c21" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <ellipse cx="330" cy="372" rx="26" ry="15" fill="#f2efe8" opacity="0.92"/>
+<ellipse cx="430" cy="372" rx="26" ry="15" fill="#f2efe8" opacity="0.92"/>
+<circle cx="332" cy="374" r="10" fill="#20242c"/><circle cx="432" cy="374" r="10" fill="#20242c"/>
+  <!-- 鼻 / 嘴 -->
+  <path d="M380,406 q8,26 -2,36" stroke="#1b1e24" stroke-width="4" fill="none" opacity="0.6"/>
+  <path d="M354,478 q26,10 52,0" stroke="#16181c" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M262,660 L380,742 L498,660 L470,626 L380,676 L290,626 Z" fill="#73777e"/>
+<path d="M380,676 L380,742" stroke="#9aa5b1" stroke-width="4" opacity="0.75"/>
+  <rect x="0" y="0" width="760" height="1100" fill="url(#r_han_resolved)"/>
+</g>
+</svg>
