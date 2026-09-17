@@ -165,6 +165,22 @@
   }
   .pcard .go { display: block; margin-top: 14px; font-family: "Press Start 2P", monospace; font-size: 9px; color: var(--c3); }
   .pcard.offline .go { color: var(--c7); }
+  .pcard.wip { border-style: dashed; box-shadow: 6px 6px 0 var(--c5); }
+  .pcard.wip:hover { background: var(--c1); transform: translate(-2px,-2px); box-shadow: 8px 8px 0 var(--c5); }
+  .pcard.wip .go { color: var(--c5); }
+
+  /* ---------- NOW ---------- */
+  .now-item { display: flex; gap: 12px; align-items: baseline; padding: 9px 0; border-bottom: 2px dashed var(--c2); flex-wrap: wrap; }
+  .now-item:last-child { border-bottom: none; }
+  .now-item .tag {
+    font-family: "Press Start 2P", monospace; font-size: 9px;
+    padding: 5px 7px; flex: 0 0 auto; border: 2px solid var(--c6);
+  }
+  .now-item .tag.doing { background: var(--c5); color: var(--c0); }
+  .now-item .tag.plan { background: transparent; color: var(--c7); }
+  .now-item .txt { font-size: 18px; color: var(--c7); flex: 1; min-width: 220px; }
+  .now-item .txt b { color: var(--c6); font-weight: normal; }
+  .now-item .txt em { font-style: normal; color: var(--c4); }
 
   /* ---------- 时间线 ---------- */
   .tl { border-left: var(--px) solid var(--c2); padding-left: 22px; }
@@ -227,6 +243,7 @@
     <a href="#about" data-page-node-id="rcZmDEPyGDEzzRH88okuwJ">关于</a>
     <a href="#skills" data-page-node-id="8mJXWNZwPggHGlPnQC440Y">技能</a>
     <a href="#projects" data-page-node-id="VI063ha8JKG4U7bufbeOhW">项目</a>
+    <a href="#now">正在做</a>
     <a href="#experience" data-page-node-id="NZCa4uA8feAz0YfG5QHT4C">经历</a>
     <a href="#certs">认证</a>
     <a href="#contact" data-page-node-id="YX8Lzvbc3RzpTDw7czuyv6">联系</a>
@@ -253,6 +270,8 @@
         <span class="chip" data-page-node-id="keF9LdK2TWXaFc85ByrZao">MySQL</span>
         <span class="chip" data-page-node-id="ECgDm5tD7yRS9iHFwJdSoA">MyBatis-Plus</span>
         <span class="chip" data-page-node-id="exfLnhR7crdf97UTilVqho">MES</span>
+        <span class="chip">Vue 3</span>
+        <span class="chip">Redis</span>
         <span class="chip">HarmonyOS</span>
       </div>
       <div class="row" data-page-node-id="VScXBamNprlRWxbBI04apu">
@@ -291,10 +310,14 @@
         <div class="skill" data-page-node-id="xxEnhpJ02Hj8OD4D8tD4lz"><span class="nm" data-page-node-id="7F2c4ZpeyXaq6KJhgAqS8k">Maven</span><div class="bars" data-lv="2" data-page-node-id="AmDlIjgpY4GGGWHtjY5AqO"></div><span class="lv" data-page-node-id="TGkoAnjbfLeaWPtczdNuhY">熟悉</span></div>
         <div class="skill" data-page-node-id="xWR0FTtMpOODI2qddIhyH1"><span class="nm" data-page-node-id="yYiaPa8jVfNIQpNOyyfZsy">Linux</span><div class="bars" data-lv="1" data-page-node-id="BJoBwBMxgyMhTpBqkvorSb"></div><span class="lv" data-page-node-id="iSsinJycKxTRCkkBiZUJre">了解</span></div>
       </div>
+      <div class="skill-group">
+        <h3>FRONTEND</h3>
+        <div class="skill"><span class="nm">Vue 3</span><div class="bars" data-lv="2"></div><span class="lv">熟悉</span></div>
+        <div class="skill"><span class="nm">HTML / CSS / JavaScript</span><div class="bars" data-lv="2"></div><span class="lv">熟悉</span></div>
+      </div>
       <div class="skill-group" data-page-node-id="HmHgggbJFaVBPIPs46hvG7">
         <h3 data-page-node-id="P2keIl0YBCpVx3AgFTeMmU">ALSO</h3>
         <div class="skill"><span class="nm">HarmonyOS / ArkTS</span><div class="bars" data-lv="2"></div><span class="lv">熟悉</span></div>
-        <div class="skill" data-page-node-id="DJ0iGNPky0OxmVniAYCt9I"><span class="nm" data-page-node-id="2l3n1Lo0zvVxsK50DQW89j">HTML / CSS / JavaScript</span><div class="bars" data-lv="2" data-page-node-id="uYZq3GfWX96wogJBi6XE9t"></div><span class="lv" data-page-node-id="MG64ZLucibsAHf87VPcDdr">熟悉</span></div>
         <div class="skill" data-page-node-id="sBsA5aPfyxVFVPySCuDwXW"><span class="nm" data-page-node-id="Qy9MDMAeyQvxTvUN4HEdmn">Python</span><div class="bars" data-lv="1" data-page-node-id="IeXWuF1NwS8eRqN5CGz51B"></div><span class="lv" data-page-node-id="Ml6bkwigwzO1AhqxUb806e">了解</span></div>
         <div class="skill" data-page-node-id="LdnwLpCUu2vg7IxdE54A0s"><span class="nm" data-page-node-id="kDqZo5fCa6mOwP0qaItYeZ">C / 嵌入式</span><div class="bars" data-lv="1" data-page-node-id="4XoqlFcQJN8jVdH0WGnHKe"></div><span class="lv" data-page-node-id="RUririSsEbrlWye0W2BW0l">了解</span></div>
       </div>
@@ -320,6 +343,13 @@
         <span class="go" data-page-node-id="4CN7x12CSIVZ5gj97cS0eO">· 企业内部系统，未公开</span>
       </div>
 
+      <div class="pcard wip">
+        <h3>智慧学习辅助系统（毕设）</h3>
+        <p>本科毕业设计，进行中。Spring Boot + Vue 3 + MySQL + Redis，五个模块：知识点上传、AI 总结、标签推荐、学习社区、后台管理。参考 Glow（知识图谱建模）与 Rust 学习助手 Agent（Prompt 模板）的设计思路，代码全部自己用 Java 重写。</p>
+        <div class="tags"><span>Spring Boot</span><span>Vue 3</span><span>MySQL</span><span>Redis</span><span>LLM</span></div>
+        <span class="go">· 开发中，仓库未公开</span>
+      </div>
+
       <a class="pcard live" href="courseware/" data-page-node-id="wP0s4shxc5ImVBy8AggWQb">
         <h3 data-page-node-id="6C7W9KhVJL6NLNrzq3fHIK">3D 互动课件系列</h3>
         <p data-page-node-id="fVtNszKAx5spIhpEaoxKRF">三套单文件互动课件：呼吸系统与气体交换、常见化学反应、食物链与食物网。Three.js 渲染，含自动演示模式与随堂练习，离线可跑。</p>
@@ -334,6 +364,33 @@
         <span class="go" data-page-node-id="fia9qU4A9FsKwXSXaw6O3d">▸ 读七条踩坑记录</span>
       </a>
 
+    </div>
+  </section>
+
+  <!-- ============ NOW ============ -->
+  <section id="now">
+    <h2>Now</h2>
+    <div class="card yellow">
+      <div class="now-item">
+        <span class="tag doing">DOING</span>
+        <span class="txt"><b>毕业设计</b> · 智慧学习辅助系统 → 已过开题，正在做 <em>MySQL 表结构设计</em>，下一步是后端接口与前端联调</span>
+      </div>
+      <div class="now-item">
+        <span class="tag doing">DOING</span>
+        <span class="txt"><b>2027 届秋招</b> · 投 <em>Java 后端 / 工业软件（MES · ERP · WMS）</em> 方向，简历与八股同步迭代</span>
+      </div>
+      <div class="now-item">
+        <span class="tag doing">DOING</span>
+        <span class="txt"><b>八股补强</b> · 按顺序啃 <em>MySQL 锁 → Java 并发 → Spring 事务</em>，每块都落到实习里的真实场景上</span>
+      </div>
+      <div class="now-item">
+        <span class="tag plan">DONE</span>
+        <span class="txt"><b>ws63 智能环境检测站</b> · 单文件 827 行 C，数码管 + 温湿度 + 光控 + 点阵全部跑通</span>
+      </div>
+      <div class="now-item">
+        <span class="tag plan">DONE</span>
+        <span class="txt"><b>三套 3D 互动课件</b> · 呼吸系统 / 化学反应 / 食物链，单文件离线可跑</span>
+      </div>
     </div>
   </section>
 
@@ -379,6 +436,7 @@
       <p class="dim" style="margin-top:16px">可在华为开发者官网「证书查询」输入编码核验 →
         <a href="https://developer.huawei.com/consumer/cn/training/devCert/searchCert" target="_blank" rel="noopener">developer.huawei.com</a>
       </p>
+      <p class="dim" style="margin-top:10px">另有全国计算机等级考试、百度之星、信创、人工智能等证书，扫描件可应要求提供。</p>
     </div>
   </section>
 
