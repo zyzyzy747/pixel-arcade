@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+<defs><linearGradient id="bg_dock_night" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#131c26"/><stop offset="55%" stop-color="#243545"/><stop offset="100%" stop-color="#080d12"/>
+</linearGradient></defs>
+<rect width="1600" height="900" fill="url(#bg_dock_night)"/>
+<path d="M0,520 L180,430 L330,500 L470,410 L640,505 L820,420 L1000,510 L1180,435 L1340,500 L1600,440 L1600,900 L0,900 Z" fill="#080d12" opacity="0.9"/>
+<path d="M0,600 L1600,600 L1600,900 L0,900 Z" fill="#080d12"/>
+<g opacity="0.85"><rect x="90" y="560" width="14" height="200" fill="#080d12"/><rect x="300" y="534" width="14" height="226" fill="#080d12"/><rect x="510" y="508" width="14" height="252" fill="#080d12"/><rect x="720" y="560" width="14" height="200" fill="#080d12"/><rect x="930" y="534" width="14" height="226" fill="#080d12"/><rect x="1140" y="508" width="14" height="252" fill="#080d12"/><rect x="1350" y="560" width="14" height="200" fill="#080d12"/><rect x="1560" y="534" width="14" height="226" fill="#080d12"/></g>
+<rect x="0" y="742" width="1600" height="158" fill="#131c26" opacity="0.55"/>
+<circle cx="140" cy="268" r="4" fill="#f0d9a0" opacity="0.6"/><circle cx="400" cy="268" r="4" fill="#f0d9a0" opacity="0.35"/><circle cx="660" cy="268" r="4" fill="#f0d9a0" opacity="0.6"/><circle cx="920" cy="268" r="4" fill="#f0d9a0" opacity="0.35"/><circle cx="1180" cy="268" r="4" fill="#f0d9a0" opacity="0.6"/><circle cx="1440" cy="268" r="4" fill="#f0d9a0" opacity="0.35"/><circle cx="1700" cy="268" r="4" fill="#f0d9a0" opacity="0.6"/>
+<rect x="-200" y="140" width="2000" height="46" fill="#cfe3ea" opacity="0.05"/><rect x="-200" y="236" width="2000" height="50" fill="#cfe3ea" opacity="0.062"/><rect x="-200" y="332" width="2000" height="54" fill="#cfe3ea" opacity="0.07400000000000001"/><rect x="-200" y="428" width="2000" height="58" fill="#cfe3ea" opacity="0.08600000000000001"/><rect x="-200" y="524" width="2000" height="62" fill="#cfe3ea" opacity="0.098"/><rect x="-200" y="620" width="2000" height="66" fill="#cfe3ea" opacity="0.11"/><rect x="-200" y="716" width="2000" height="70" fill="#cfe3ea" opacity="0.12200000000000001"/>
+<rect width="1600" height="900" fill="#000" opacity="0.10"/>
+</svg>
