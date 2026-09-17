@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+<defs><linearGradient id="bg_street" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0%" stop-color="#141c22"/><stop offset="55%" stop-color="#2a3a44"/><stop offset="100%" stop-color="#080c0f"/>
+</linearGradient></defs>
+<rect width="1600" height="900" fill="url(#bg_street)"/>
+<rect x="0" y="0" width="1600" height="900" fill="#2a3a44" opacity="0.30"/>
+<rect x="0" y="180" width="240" height="620" fill="#080c0f" opacity="0.85"/><rect x="300" y="250" width="240" height="550" fill="#080c0f" opacity="0.85"/><rect x="600" y="320" width="240" height="480" fill="#080c0f" opacity="0.85"/><rect x="900" y="390" width="240" height="410" fill="#080c0f" opacity="0.85"/><rect x="1200" y="180" width="240" height="620" fill="#080c0f" opacity="0.85"/><rect x="1500" y="250" width="240" height="550" fill="#080c0f" opacity="0.85"/>
+<rect x="60" y="240" width="60" height="70" fill="#f0d9a0" opacity="0.25"/><rect x="360" y="310" width="60" height="70" fill="#f0d9a0" opacity="0.4"/><rect x="660" y="380" width="60" height="70" fill="#f0d9a0" opacity="0.55"/><rect x="960" y="450" width="60" height="70" fill="#f0d9a0" opacity="0.25"/><rect x="1260" y="240" width="60" height="70" fill="#f0d9a0" opacity="0.4"/><rect x="1560" y="310" width="60" height="70" fill="#f0d9a0" opacity="0.55"/>
+<rect x="0" y="740" width="1600" height="160" fill="#080c0f"/>
+<rect x="-200" y="140" width="2000" height="46" fill="#cfe3ea" opacity="0.05"/><rect x="-200" y="236" width="2000" height="50" fill="#cfe3ea" opacity="0.062"/><rect x="-200" y="332" width="2000" height="54" fill="#cfe3ea" opacity="0.07400000000000001"/><rect x="-200" y="428" width="2000" height="58" fill="#cfe3ea" opacity="0.08600000000000001"/><rect x="-200" y="524" width="2000" height="62" fill="#cfe3ea" opacity="0.098"/><rect x="-200" y="620" width="2000" height="66" fill="#cfe3ea" opacity="0.11"/><rect x="-200" y="716" width="2000" height="70" fill="#cfe3ea" opacity="0.12200000000000001"/>
+<rect width="1600" height="900" fill="#000" opacity="0.10"/>
+</svg>
