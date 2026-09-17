@@ -244,6 +244,7 @@
     <a href="#skills" data-page-node-id="8mJXWNZwPggHGlPnQC440Y">技能</a>
     <a href="#projects" data-page-node-id="VI063ha8JKG4U7bufbeOhW">项目</a>
     <a href="#now">正在做</a>
+    <a href="#lab">Lab</a>
     <a href="#experience" data-page-node-id="NZCa4uA8feAz0YfG5QHT4C">经历</a>
     <a href="#certs">认证</a>
     <a href="#contact" data-page-node-id="YX8Lzvbc3RzpTDw7czuyv6">联系</a>
@@ -391,6 +392,36 @@
         <span class="tag plan">DONE</span>
         <span class="txt"><b>三套 3D 互动课件</b> · 呼吸系统 / 化学反应 / 食物链，单文件离线可跑</span>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ LAB ============ -->
+  <section id="lab">
+    <h2>Lab</h2>
+    <p class="dim" style="margin:-8px 0 18px">主线之外自己折腾的工程活——只谈技术，不谈内容。</p>
+    <div class="grid">
+
+      <div class="pcard">
+        <h3>资产逆向与几何重建工具链</h3>
+        <p>给一个 3D 游戏做资产管线的逆向：运行时帧转储抓数据 → 解析二进制顶点 / 索引缓冲 → Blender 里重建网格 → 改几何 → 回填导出。蒙皮权重、法线、UV 按源顶点逐字节对齐；为了不进游戏也能验收，自己写了个三角形光栅化 + z-buffer 渲染器做离线渲染。</p>
+        <div class="tags"><span>二进制格式</span><span>逆向</span><span>Blender / Python</span><span>图形学</span></div>
+        <span class="go">· 自用工具，未公开</span>
+      </div>
+
+      <div class="pcard">
+        <h3>多站点批量采集与清洗管道</h3>
+        <p>把重复的手工下载变成一条命令：多数据源统一接口、断点续跑、分片并发、去重筛选、残缺文件自动清理与重试。踩过一次"脚本只剩一份、机器重装就没了"的亏，现在脚本随工作区一起备份，换机器能一键还原。</p>
+        <div class="tags"><span>Python</span><span>并发</span><span>数据清洗</span><span>容错</span></div>
+        <span class="go">· 自用工具，未公开</span>
+      </div>
+
+      <div class="pcard">
+        <h3>Agent 技能工程与自优化流水线</h3>
+        <p>把反复踩坑的流程固化成可复用的技能包：结构化文档 + 评分维度表 + 多轮独立子 agent 交叉复测，让脚本和文档在被反复使用之后还能持续收敛。顺手做了工作区治理（重复副本识别、失效路径批量重指向）。</p>
+        <div class="tags"><span>工程化</span><span>Prompt 设计</span><span>自动化</span></div>
+        <span class="go">· 自用工具，未公开</span>
+      </div>
+
     </div>
   </section>
 
