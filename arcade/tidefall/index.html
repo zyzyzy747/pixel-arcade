@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>潮下 · 盐霜调查录</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="src/css/style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===================== 标题画面 ===================== -->
+  <section id="title" class="screen active">
+    <div class="title-bg"></div>
+    <div class="title-inner">
+      <div class="title-sub">TIDEFALL</div>
+      <h1 class="title-main">潮　下</h1>
+      <div class="title-sub2">— 盐霜调查录 —</div>
+      <nav class="title-menu">
+        <button data-act="new">开始调查</button>
+        <button data-act="continue">继续</button>
+        <button data-act="load">读取存档</button>
+        <button data-act="gallery">回想</button>
+        <button data-act="settings">设置</button>
+      </nav>
+      <div class="title-foot">雾不散，海不静。你带着三年前的一段空白回到这里。</div>
+    </div>
+  </section>
+
+  <!-- ===================== 游戏主画面 ===================== -->
+  <section id="stage" class="screen">
+    <div id="viewport">
+      <img id="bg-img" alt="">
+      <div id="bg-mask"></div>
+
+      <div id="char-layer"></div>
+
+      <div id="cg-layer"><img id="cg-img" alt=""></div>
+
+      <!-- 顶部 HUD -->
+      <div id="hud">
+        <div id="res-meter" title="共鸣度：共感会用它换走你的记忆">
+          <span class="res-label">共鸣</span>
+          <div class="res-bar"><div id="res-fill"></div></div>
+          <span id="res-num">0</span>
+        </div>
+        <div id="hud-btns">
+          <button data-act="backlog" title="历史 (H)">历</button>
+          <button data-act="auto"    title="自动 (A)">自</button>
+          <button data-act="skip"    title="跳过已读 (Ctrl)">跳</button>
+          <button data-act="qsave"   title="快速存档 (F5)">存</button>
+          <button data-act="qload"   title="快速读档 (F9)">读</button>
+          <button data-act="save"    title="存档">档</button>
+          <button data-act="settings" title="设置">设</button>
+          <button data-act="title"   title="返回标题">×</button>
+        </div>
+      </div>
+
+      <!-- 提示：点击继续 -->
+      <div id="next-hint">▼</div>
+
+      <!-- 对话框 -->
+      <div id="textbox">
+        <div id="speaker"><span id="speaker-name"></span></div>
+        <div id="message"></div>
+      </div>
+
+      <!-- 选项 -->
+      <div id="choices"></div>
+
+      <!-- 场景标题 -->
+      <div id="chapter-card"><div id="chapter-title"></div><div id="chapter-sub"></div></div>
+    </div>
+  </section>
+
+  <!-- ===================== 覆盖层 ===================== -->
+  <div id="overlay" class="hidden">
+    <div id="overlay-panel"></div>
+  </div>
+
+  <!-- 全屏特效 -->
+  <div id="fx-flash"></div>
+
+</div>
+
+<script src="assets/manifest.js"></script>
+<script src="src/js/script.js"></script>
+<script src="src/js/save.js"></script>
+<script src="src/js/engine.js"></script>
+<script src="src/js/ui.js"></script>
+</body>
+</html>
