@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 1100" width="760" height="1100">
+<defs>
+  <linearGradient id="g_bai_tense" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#726a7b"/>
+    <stop offset="60%" stop-color="#544a5f"/>
+    <stop offset="100%" stop-color="#2e2834"/>
+  </linearGradient>
+  <radialGradient id="r_bai_tense" cx="0.5" cy="0.28" r="0.75">
+    <stop offset="0%" stop-color="#7fb7be" stop-opacity="0.20"/>
+    <stop offset="100%" stop-color="#7fb7be" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<g transform="rotate(-1.5 380 700)">
+  <!-- 肩胸 -->
+  <path d="M120,1100 C120,880 236,760 380,760 C524,760 640,880 640,1100 Z" fill="url(#g_bai_tense)"/>
+  <!-- 脖子 -->
+  <rect x="344" y="648" width="72" height="130" rx="30" fill="#443c4d"/>
+  <!-- 头 -->
+  <ellipse cx="380" cy="410" rx="104" ry="126" fill="#4b4255"/>
+  <!-- 头发 -->
+  <path d="M232,352 C232,232 302,182 380,182 C458,182 528,232 528,352 L534,700 C534,700 500,560 512,470 L470,500 C470,500 456,352 380,352 C304,352 290,500 290,500 L248,470 C260,560 226,700 226,700 Z" fill="#e9e5de"/>
+  <!-- 眉 -->
+  <path d="M300,329.0 q30,-8.8 58,-1.4" stroke="#a3a09b" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <path d="M460,329.0 q-30,-8.8 -58,-1.4" stroke="#a3a09b" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <ellipse cx="330" cy="372" rx="24" ry="8" fill="#f2efe8" opacity="0.92"/>
+<ellipse cx="430" cy="372" rx="24" ry="8" fill="#f2efe8" opacity="0.92"/>
+<circle cx="332" cy="374" r="8" fill="#20242c"/><circle cx="432" cy="374" r="8" fill="#20242c"/>
+  <!-- 鼻 / 嘴 -->
+  <path d="M380,406 q8,26 -2,36" stroke="#2a252f" stroke-width="4" fill="none" opacity="0.6"/>
+  <path d="M354,478 q26,10 52,0" stroke="#211d26" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M226,300 C226,180 300,140 380,140 C460,140 534,180 534,300 L534,344 C534,344 470,300 380,300 C290,300 226,344 226,344 Z"
+ fill="#7fb7be" opacity="0.30"/>
+  <rect x="0" y="0" width="760" height="1100" fill="url(#r_bai_tense)"/>
+</g>
+</svg>
