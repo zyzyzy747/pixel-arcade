@@ -10,11 +10,15 @@
 ├── index.html                 # 个人主页（青山）
 ├── arcade/
 │   └── index.html             # PIXEL ARCADE 像素玩具屋
+├── courseware/                # 3D 互动课件三套（自带 three.js，离线可跑）
+├── notes/
+│   └── ws63.html              # ws63 智能环境检测站 · 踩坑记录
 ├── assets/
 │   ├── avatar.png             # 头像 · 原色像素化（40×40 → 240×240）
 │   └── avatar-pico.png        # 头像 · PICO-8 限色版（悬停切换）
 ├── tools/
-│   └── make_avatar.py         # 头像像素化脚本（Pillow）
+│   ├── make_avatar.py         # 头像像素化脚本（Pillow）
+│   └── check_deploy.py        # 上线自检（状态码 + 关键内容）
 └── .github/workflows/deploy.yml
 ```
 
@@ -23,6 +27,8 @@
 - 头像 hover 在「原色像素版 / PICO-8 限色版」之间切换
 - 技能用方块表示（熟练 / 熟悉 / 了解三档），不用百分比
 - 邮箱由 JS 拼出并支持一键复制，静态 HTML 里不含明文
+- **NOW 区块**：当前正在做的事（毕设 / 秋招 / 八股补强）与已交付的东西
+- **认证区**：HarmonyOS 基础 + 高级，附证书编码可在华为官网核验
 - 时间线式经历（实习 + 在校）
 
 ## PIXEL ARCADE（`/arcade/`）
