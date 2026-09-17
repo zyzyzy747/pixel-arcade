@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+<defs><radialGradient id="cg_cg_rite" cx="0.5" cy="0.5" r="0.7">
+<stop offset="0%" stop-color="#c9a961" stop-opacity="0.55"/><stop offset="100%" stop-color="#c9a961" stop-opacity="0"/>
+</radialGradient></defs>
+<rect width="1600" height="900" fill="#1d1a20"/>
+<path d="M200,900 L260,300 L320,900 Z" fill="#c9a961" opacity="0.06"/><path d="M350,900 L410,390 L470,900 Z" fill="#c9a961" opacity="0.09"/><path d="M500,900 L560,480 L620,900 Z" fill="#c9a961" opacity="0.12"/><path d="M650,900 L710,570 L770,900 Z" fill="#c9a961" opacity="0.15"/><path d="M800,900 L860,300 L920,900 Z" fill="#c9a961" opacity="0.06"/><path d="M950,900 L1010,390 L1070,900 Z" fill="#c9a961" opacity="0.09"/><path d="M1100,900 L1160,480 L1220,900 Z" fill="#c9a961" opacity="0.12"/><path d="M1250,900 L1310,570 L1370,900 Z" fill="#c9a961" opacity="0.15"/><path d="M1400,900 L1460,300 L1520,900 Z" fill="#c9a961" opacity="0.06"/>
+<circle cx="800" cy="430" r="300" fill="url(#cg_cg_rite)"/>
+<circle cx="800" cy="430" r="120" fill="none" stroke="#c9a961" stroke-width="3" opacity="0.6"/>
+<circle cx="800" cy="430" r="200" fill="none" stroke="#c9a961" stroke-width="2" opacity="0.35"/>
+<text x="800" y="840" text-anchor="middle" font-family="serif" font-size="46" fill="#c9a961" opacity="0.75">换名</text>
+</svg>
