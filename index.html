@@ -214,12 +214,14 @@
   footer a { color: var(--c4); text-decoration: none; }
 
   .toast {
-    position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%) translateY(120%);
+    position: fixed; left: 50%; bottom: 34px;
+    transform: translateX(-50%) translateY(calc(100% + 60px));
+    visibility: hidden; pointer-events: none;
     background: var(--ca); color: var(--c0); border: var(--px) solid var(--c6);
     box-shadow: 5px 5px 0 var(--c6); padding: 12px 18px;
     font-family: "Press Start 2P", monospace; font-size: 11px; z-index: 50;
   }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.show { transform: translateX(-50%) translateY(0); visibility: visible; pointer-events: auto; }
 
   @media (max-width: 640px) {
     body { font-size: 18px; }
@@ -403,6 +405,10 @@
         <span class="tag plan">DONE</span>
         <span class="txt"><b>三套 3D 互动课件</b> · 呼吸系统 / 化学反应 / 食物链，单文件离线可跑</span>
       </div>
+      <div class="now-item">
+        <span class="tag plan">DONE</span>
+        <span class="txt"><b>生活手账</b> · 单文件 H5 应用 + 自写 WebView 安卓壳，云数据库 + 行级权限，仓库已开源</span>
+      </div>
     </div>
   </section>
 
@@ -446,6 +452,13 @@
         <div class="tags"><span>工程化</span><span>Prompt 设计</span><span>自动化</span></div>
         <span class="go">· 自用工具，未公开</span>
       </div>
+
+      <a class="pcard live" href="https://github.com/zyzyzy747/life-book" target="_blank" rel="noopener">
+        <h3>单文件 H5 应用 + 自写 WebView 安卓壳</h3>
+        <p>个人生活记录应用：一个 HTML 文件装完六个模块（记账 / 日记 / 生活 / 运动 / 健康 / 数据备份），后端直接用云数据库，靠行级权限按用户隔离，服务端零代码。安卓侧是自写的 WebView 壳——原生读计步传感器、经 JS 桥把数据回灌页面，文件选择器也自己实现（默认那条在 WebView 里点了不弹）；图表全部手写 SVG，不引任何图表库，换肤、导出导入、旧版 App 数据格式迁移都做了。</p>
+        <div class="tags"><span>原生 JS</span><span>云数据库 / 行级权限</span><span>Android WebView</span><span>SVG 可视化</span></div>
+        <span class="go">▸ 看源码（已开源）</span>
+      </a>
 
     </div>
   </section>
