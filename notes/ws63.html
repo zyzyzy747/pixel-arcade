@@ -165,7 +165,8 @@
       南向设备开发课程项目。一个 22 KB 的单文件 C 程序，在 ws63 芯片上把
       <b>TM1637 四位数码管</b>、<b>DHT11 温湿度</b>、<b>光敏 ADC</b> 和
       <b>8×8 点阵</b>跑起来。<br>
-      下面这七条是真正踩过的坑——不是教程里抄的，是编译报错和示波器前熬出来的。
+      下面这七条是真正踩过的坑——不是教程里抄的，是编译报错和示波器前熬出来的。<br>
+      第 5 节再补一次硬件级排障：项目扩成气象站后 DHT11 突然全读失败，靠软件自检反推出传感器的实际接线。
     </p>
   </header>
 
@@ -427,6 +428,58 @@ frame_count++;
         <p style="margin-top:14px;">任务句柄创建完立刻 <code>osal_kfree()</code> 释放——任务本身继续在跑，只是不再持有这个句柄，省下一份内存。</p>
       </div>
     </div>
+  </section>
+
+  <section class="block">
+    <h2><span class="num">05</span>后续：项目扩成气象站，DHT11 突然全读失败</h2>
+
+    <p style="color:var(--c7); margin-bottom:18px;">同一个 DHT11、同一段单总线时序，在检测站里好好的；换成气象站项目后读数恒为失败。没有示波器和逻辑分析仪，最后靠纯软件自检把接线位置反推了出来。</p>
+
+    <div class="pit">
+      <div class="pit-head">
+        <span class="pit-no">01</span>
+        <span class="pit-title">现象：网络全绿，唯独本地读数恒失败</span>
+      </div>
+      <div class="pit-body">
+        <p><span class="tagon t-sym">现象</span>串口里 WiFi、MQTT、网络天气全部正常，只有 DHT11 每次读都失败；上报 JSON 里 <code>local_ok</code> 恒为 0，而 <code>net_ok</code> 恒为 1。链路没问题，坏的是这一根单总线。</p>
+        <p><span class="tagon t-why">先做减法</span>与其反复改代码，不如先把失败点切开：给读取函数加分阶段日志，区分「从机无应答 / 应答电平异常 / 数据位超时 / 校验和错误」，并打印采样前总线的空闲电平。结果稳定停在应答阶段，且空闲电平是 <b>0</b>——但代码已经开了内部强上拉，空闲时本该被拉回 1。</p>
+      </div>
+    </div>
+
+    <div class="pit">
+      <div class="pit-head">
+        <span class="pit-no">02</span>
+        <span class="pit-title">手段：把引脚拉低再释放，看它能不能自己弹回来</span>
+      </div>
+      <div class="pit-body">
+        <p>「空闲电平为 0」有两种可能：线根本没接到这根引脚（悬空），或者这根引脚被板上的东西强行拉低。分不清这两种，就换不到对的引脚。于是写了个自检：<strong>把引脚拉低，再释放成高阻输入，读回电平</strong>。</p>
+        <p>线若真挂在带上拉的传感器上，它会自己弹回高电平；若悬空或被人拉死，就还是低。<strong>关键前提：DHT11 模组自带 4.7k 上拉——所以「它插在哪根针上，那根针必被拉高」</strong>，用这个特征就能反推接线位置。</p>
+<pre><span class="cm">/* 判定某个引脚上是否真的挂着带上拉的传感器 */</span>
+<span class="kw">static int</span> <span class="nm">line_present</span>(<span class="kw">pin_t</span> p)
+{
+    <span class="nm">uapi_pin_set_mode</span>(p, <span class="nm">HAL_PIN_MODE_GPIO</span>);
+    <span class="nm">uapi_gpio_set_dir</span>(p, <span class="nm">GPIO_DIRECTION_OUTPUT</span>);
+    <span class="nm">uapi_gpio_set_val</span>(p, <span class="nm">0</span>);                  <span class="cm">/* 先拉到低 */</span>
+    <span class="nm">uapi_gpio_set_dir</span>(p, <span class="nm">GPIO_DIRECTION_INPUT</span>);   <span class="cm">/* 再释放 */</span>
+    <span class="kw">return</span> <span class="nm">uapi_gpio_get_val</span>(p);             <span class="cm">/* 弹回 1 => 线上有东西 */</span>
+}</pre>
+        <p><span class="tagon t-fix">结果</span>把板上几根候选脚全扫一遍：只有 <b>GPIO10</b> 读回 1（另外两根是板载 TM1637 自己的线）。数据线的实际位置，就这么被试出来了。</p>
+      </div>
+    </div>
+
+    <div class="pit">
+      <div class="pit-head">
+        <span class="pit-no">03</span>
+        <span class="pit-title">根因与解法：同一个引脚，被两件事同时用</span>
+      </div>
+      <div class="pit-body">
+        <p><span class="tagon t-why">根因</span>数据线在 GPIO10，而程序里 <strong>GPIO10 正好被当成状态 LED 的输出脚</strong>，默认输出低电平——等于把 DHT11 的总线一直按在地上，从机再想拉高应答也拉不起来。这也解释了为什么「代码没怎么改、只是换了项目」就坏了：引脚分配一变，冲突才暴露。</p>
+        <p><span class="tagon t-sym">另一处坑</span>气象站要用数码管，而板载显示选择器占着 GPIO02，原本 DHT11 就接在 GPIO02 上。程序一旦把选择器驱动成低电平，这根线同样会被拉死——所以 DHT11 必须换到空闲引脚。</p>
+        <p><span class="tagon t-fix">解法</span>把两件事拆开：<strong>DHT11 用 GPIO10，LED 挪到空闲的 GPIO12</strong>，冲突消失，而且一根线都不用动。所有引脚集中写在一张分配表里，谁占哪根一眼可见。</p>
+      </div>
+    </div>
+
+    <p style="color:var(--c7); margin-top:22px;">事后总结：嵌入式里的「代码问题」经常是接线问题，而接线问题可以被软件逼问出来——拉低、释放、回读，三步就能把一根引脚上的真相问清楚。</p>
   </section>
 
   <footer>
