@@ -471,6 +471,20 @@
         <span class="go">▸ 看源码（已开源）</span>
       </a>
 
+      <a class="pcard live" href="https://github.com/zyzyzy747/personal-gallery" target="_blank" rel="noopener">
+        <h3>个人图库 · 本机图库 + 小说阅读器</h3>
+        <p>把散在磁盘上的七千多套图、七万本小说变成能在浏览器和手机上浏览、搜索、阅读的私有图库，没有数据库也没有云存储：目录名就是唯一元数据，<code>build.py</code> 扫盘解析成结构化索引与缩略图，前端虚拟滚动只渲染可视行，18 万张图滚起来不掉帧。<code>serve.py</code> 只用标准库——<code>/raw</code> 直出原图并支持 HTTP Range（视频能拖进度条）、小说正文自动识别 UTF-8 / GB18030 / Big5 / UTF-16、令牌鉴权加 Cookie 记住；配一条 Cloudflare 隧道，电脑开着手机就能访问。</p>
+        <div class="tags"><span>Python 标准库</span><span>虚拟滚动</span><span>原生 JS</span><span>Cloudflare Tunnel</span></div>
+        <span class="go">▸ 看源码（已开源）</span>
+      </a>
+
+      <a class="pcard live" href="https://github.com/zyzyzy747/telegram-batch-downloader" target="_blank" rel="noopener">
+        <h3>Telegram 批量下载器</h3>
+        <p>扫码登录后浏览频道、群组、收藏与评论区，按类型 / 关键词 / 日期 / 大小筛选，批量下载并自动分类：512KB 分块断点续传、<code>FLOOD_WAIT</code> 自动等待、掉线重连、小文件优先且大文件单独限流（避免几十 MB 的文件堵死队列）。下载前先去重——识别 <code>0-140</code> / <code>第1-120章</code> 之类区间写法，区间被更大范围覆盖的直接跳过；另有按 5/10/30/60 分钟的定时追更。后端 Telethon 走 MTProto，Flask + SSE 推实时进度，前端原生 JS 虚拟列表。</p>
+        <div class="tags"><span>Python</span><span>Telethon / MTProto</span><span>Flask + SSE</span><span>断点续传</span></div>
+        <span class="go">▸ 看源码（已开源）</span>
+      </a>
+
     </div>
   </section>
 
