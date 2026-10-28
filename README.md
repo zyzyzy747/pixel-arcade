@@ -124,4 +124,4 @@ python -m http.server 8000
 
 ## 许可
 
-MIT
+MIT，见 [LICENSE](LICENSE)。
